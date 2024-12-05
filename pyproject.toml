@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"] #, "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+#[tool.setuptools_scm]
+#version_file = "search-dragon/_version.py"
+
+[project]
+name = "search-dragon"
+authors = [
+    {name = "Brenda Gutman", email="brenda.gutman@vumc.org"}
+]
+description = "Unified API Interface for ontology search APIs."
+readme = "README.md"
+requires-python = ">3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = []
+
+dynamic = ["version"]
+
+[tool.setuptools.packages.find]
+where = ["src"]  # list of folders that contain the packages (["."] by default)
+
+#[project.scripts]
+#asdf = "search-dragon.search:main"
