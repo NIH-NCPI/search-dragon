@@ -27,27 +27,23 @@ from filters import format_keyword, format_ontology
 from typing import List
 
 
-class OntologyAPI:
-    def __init__(self, base_url, api_id, api_name):
-        self.base_url = base_url
-        self.api_id = api_id
-        self.api_name = api_name
 
-    def get_api_instance(search_api):
-        if search_api == "ols":
-            return OLSSearchAPI()
-        else:
-            pass
 
 class OLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(base_url=OLS_API_BASE_URL, api_id=OLS_API)
+
+    # Set variables for each api here
+    # Each api with own file in sources
+    # If no ontologies - include only the special ontology list
 
     def build_url(self, keywords: List, ontologies: List):
         """Expected format:
         http://www.ebi.ac.uk/ols4/api/search?q={q}&ontology={ontology}
         http://www.ebi.ac.uk/ols4/api/search?q={q}+{q}&ontology={ontology},{ontology}
         """
+        # account for empty query params
+        # Maybe make the query params in the format functions
         final_url_list = []
         query_params = []
 

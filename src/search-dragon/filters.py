@@ -1,3 +1,4 @@
+#base class - changes per api
 def format_keyword():
     """Will ensure the keyword is acceptable and apply any fuzzy match"""
     pass
@@ -7,6 +8,13 @@ def format_ontology():
     Will ensure the ontology is acceptable and filter on users choices
     May not need.
     - Filtering down to user preferred ontologies after counts are made in result_structure.py
+    """
+    pass
+
+def remove_duplicate_responses():
+    """
+    Searching multiple APIs with similar Ontologies will result in duplicate codes 
+    being returned.
     """
     pass
 
@@ -33,8 +41,4 @@ def format_ontology():
 #     sent by the frontend request?  - This might go in result_structure.py instead
 #     """
 
-def remove_duplicate_responses():
-    """
-    Searching multiple APIs with similar Ontologies will result in duplicate codes 
-    being returned.
-    """
+

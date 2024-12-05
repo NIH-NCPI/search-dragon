@@ -71,7 +71,7 @@ def run_search(keyword):
 
 
     # Collect and harmonize ontology api search results
-    # Run in parallel?
+    # Run in parallel? threads mutex
     search_data = []
     for search_api in SEARCH_API_BASE_URLS:
         # Instantiate the search api
@@ -80,16 +80,19 @@ def run_search(keyword):
         # Generate search urls
         search_url = api_instance.build_url(keyword)
 
-        api_results = collect_data(search_url, api_instance)
+        api_results = collect_data(search_url, api_instance) # the api instance version
 
         # General filtering/formatting stage each api response (filter.py)
         # API specific cleaning done in the collect_data transformation/harmonization stage (collect_data())
 
-        search_api.append(api_results)
+        search_data.append(api_results)
 
     # Generate response - counts and general formatting (response_structure.py)
 
     return search_data
+
+    # send to yelena as the results come in? Yelena send multiple calls instead. - new arg api to run
+    # We really want this. 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Modular API Ontology Search")

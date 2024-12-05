@@ -15,4 +15,5 @@ def validate_response():
     """
     NULLs have been handled, no duplicates ...
     """
+    pass
 
