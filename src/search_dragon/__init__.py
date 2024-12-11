@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 import time
 
-LOGS_PATH = f"data/logs/search.log"
+LOGS_PATH = f"../data/logs/search.log"
 LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 
 
