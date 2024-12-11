@@ -35,14 +35,14 @@ class OLSSearchAPI(OntologyAPI):
     # Each api with own file in sources
     # If no ontologies - include only the special ontology list
 
-    def format_keyword(self, keywords):
+    def format_keyword(self, keyword_list):
         """
         Will ensure the keyword is acceptable and apply any fuzzy match
         q=cancer+brain%20cancer
         Setting keyword as a list for eventual fuzzy match capability
         """
-        if keywords:
-            formatted_keywords = "+".join(keywords)
+        if keyword_list:
+            formatted_keywords = "+".join(keyword_list)
         else:
             formatted_keywords = "aspirin"
 
@@ -64,7 +64,7 @@ class OLSSearchAPI(OntologyAPI):
 
         return ontology_param
 
-    def build_url(self, keywords):
+    def build_url(self, keyword_list):
         """Expected format:
         http://www.ebi.ac.uk/ols4/api/search?q={q}&ontology={ontology}
         http://www.ebi.ac.uk/ols4/api/search?q={q}+{q}&ontology={ontology},{ontology}
@@ -75,7 +75,7 @@ class OLSSearchAPI(OntologyAPI):
         url_blocks = []
         url_blocks.append(f"{self.base_url}search?")
 
-        keyword_param = self.format_keyword(keywords)
+        keyword_param = self.format_keyword(keyword_list)
         ontology_param = self.format_ontology()
 
         # Join the query params with & then join the params to the base url

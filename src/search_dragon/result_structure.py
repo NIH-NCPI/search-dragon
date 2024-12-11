@@ -6,7 +6,8 @@ of results. - considering dirty api data
 Might want to include something like locutus Coding?
 """
 def generate_response(data):
-    return data
+    structured_data = {"results":data}
+    return structured_data
 
 def structure_response():
     pass
