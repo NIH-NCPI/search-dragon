@@ -35,18 +35,18 @@ class OLSSearchAPI(OntologyAPI):
     # Each api with own file in sources
     # If no ontologies - include only the special ontology list
 
-    def format_keyword(self, keyword_list):
+    def format_keyword(self, keywords=None):
         """
         Will ensure the keyword is acceptable and apply any fuzzy match
         q=cancer+brain%20cancer
         Setting keyword as a list for eventual fuzzy match capability
         """
-        if keyword_list:
-            formatted_keywords = "+".join(keyword_list)
+        if keywords is None:
+            keywords = f"Bartonella%20henselae"
         else:
-            formatted_keywords = "aspirin"
+            keywords = keywords.replace(" ","%20")
 
-        keyword_param=f"q={formatted_keywords}"
+        keyword_param=f"q={keywords}"
 
         return keyword_param
 
@@ -64,7 +64,7 @@ class OLSSearchAPI(OntologyAPI):
 
         return ontology_param
 
-    def build_url(self, keyword_list):
+    def build_url(self, keywords):
         """Expected format:
         http://www.ebi.ac.uk/ols4/api/search?q={q}&ontology={ontology}
         http://www.ebi.ac.uk/ols4/api/search?q={q}+{q}&ontology={ontology},{ontology}
@@ -75,7 +75,7 @@ class OLSSearchAPI(OntologyAPI):
         url_blocks = []
         url_blocks.append(f"{self.base_url}search?")
 
-        keyword_param = self.format_keyword(keyword_list)
+        keyword_param = self.format_keyword(keywords)
         ontology_param = self.format_ontology()
 
         # Join the query params with & then join the params to the base url
@@ -89,14 +89,11 @@ class OLSSearchAPI(OntologyAPI):
         if isinstance(raw_results, list):
             return [self.harmonize_data(item) for item in raw_results]
         
-        # If raw_results is a single dictionary, proceed with harmonization
         harmonized_data = {
-            "ontology_code": raw_results.get("obo_id"),
-            "ontology_iri": raw_results.get("iri"),
-            "ontology_name": raw_results.get("ontology_name"),
-            "ontology_prefix": raw_results.get("ontology_prefix"),
-            "short_form": raw_results.get("short_form"),
-            "label": raw_results.get("label"),
+            "code": raw_results.get("obo_id"),
+            "system": None, #TODO get from firestore
+            "code_iri": raw_results.get("iri"),
+            "display": raw_results.get("label"),
             "description": raw_results.get("description", []),
         }
 
@@ -104,5 +101,5 @@ class OLSSearchAPI(OntologyAPI):
     
     # # TODO 
     # def apply_fuzzy_match():
-    #     """"""
+    #     """Create more keywords to search for."""
     #     pass

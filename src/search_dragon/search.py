@@ -14,31 +14,38 @@ from search_dragon.result_structure import generate_response
 from search_dragon.curate_combined_data import curate_combined_data
 import argparse
 
-SEARCH_APIS = ["ols"]
+SEARCH_APIS = [{"ols": OLSSearchAPI}]
 
-def get_api_instance(search_api):
 
-    if search_api == "ols" or search_api == "all":
-        return OLSSearchAPI()
+def get_api_instance(search_api_list=None):
+    api_instances = []
+
+    if search_api_list is None:
+        for api_dict in SEARCH_APIS:
+            for api_class in api_dict.values():
+                api_instances.append(api_class())
     else:
-        message = f"Ontology API: {search_api} is not recognized."
-        logger.info(message)
-        raise ValueError(message)
+        # Process only the APIs in the provided list
+        for search_api in search_api_list:
+            for api_dict in SEARCH_APIS:
+                if search_api in api_dict:
+                    api_instances.append(api_dict[search_api]())
+                    break
+            else:
+                # Raise an error if the API is not found
+                message = f"Ontology API '{search_api}' is not recognized."
+                logger.info(message)
+                raise ValueError(message)
+
+    return api_instances
 
 
-def run_search(search_api_list, keyword, ontology_list):
+def run_search(keyword=None, ontology_list=None, search_api_list=None):
     """
     The master function
 
     """
-    # Collect and harmonize ontology api search results
-    # Run in parallel? threads mutex
-    # send to yelena as the results come in? Yelena send multiple calls instead. - new arg api to run
-    # We really want this.
-    # If FE calls each api request separately. How to harmonize the data? ie duplicates.
-    api_instances=[]
-    for api in search_api_list:
-        api_instances.append(get_api_instance(api))
+    api_instances = get_api_instance(search_api_list)
 
     combined_data = []
     for api_instance in api_instances:
