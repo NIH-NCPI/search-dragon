@@ -8,8 +8,8 @@ What info needs to come from front end(optional/required)
 """
 
 from search_dragon import logger
-from search_dragon.sources import OntologyAPI
-from search_dragon.sources.ols_api import OLSSearchAPI
+from search_dragon.external_apis import OntologyAPI
+from search_dragon.external_apis.ols_api import OLSSearchAPI
 from search_dragon.result_structure import generate_response
 from search_dragon.curate_combined_data import curate_combined_data
 import argparse
@@ -40,7 +40,7 @@ def get_api_instance(search_api_list=None):
     return api_instances
 
 
-def run_search(keyword=None, ontology_list=None, search_api_list=None):
+def run_search(ontology_data, keyword, ontology_list=None, search_api_list=None):
     """
     The master function
 
@@ -51,7 +51,7 @@ def run_search(keyword=None, ontology_list=None, search_api_list=None):
     for api_instance in api_instances:
 
         # Generate the search url
-        search_url = api_instance.build_url(keyword)
+        search_url = api_instance.build_url(keyword, ontology_data)
         logger.info(f"URL:{search_url}")
 
         # Fetch the data
@@ -59,7 +59,7 @@ def run_search(keyword=None, ontology_list=None, search_api_list=None):
         logger.info(f"Count results: {len(api_results)}")
 
         # harmonize the api specific data into standard structure
-        harmonized_data = api_instance.harmonize_data(api_results)
+        harmonized_data = api_instance.harmonize_data(api_results, ontology_data)
         logger.info(f"Count harmonized_data: {len(harmonized_data)}")
 
         # Combine the ontology api data
@@ -70,52 +70,8 @@ def run_search(keyword=None, ontology_list=None, search_api_list=None):
     curated_data = curate_combined_data(combined_data, ontology_list)
 
     # Final cleaning and structuring of the combined data
-    response = generate_response(curated_data)
+    response = generate_response(curated_data, search_url)
     logger.info(f"{keyword}")
-    logger.info(f"response:{response}")
+    logger.info(response)
 
     return response
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Modular API Ontology Search")
-    parser.add_argument(
-        "-s",
-        "--search_api",
-        required=False,
-        default=["all"],
-        nargs="*",
-        help=(
-            "Specify one or more APIs to use for ontology data retrieval. "
-            "Available options:\n"
-            "  'ols': Gather data with the Ontology Lookup Service API."
-            "  'all': Gather data using all available ontology APIs."
-        ),
-    )
-    parser.add_argument(
-        "-k",
-        "--keywords",
-        required=False,
-        default=["Bartonella henselae"],
-        nargs="*",
-        help="keyword(s) to search",
-    )
-    parser.add_argument(
-        "-o", "--ontologies",
-        required=False,
-        default=[None],
-        nargs="*",
-        help="User preferred Ontologies"
-    )
-
-    args = parser.parse_args()
-
-    run_search(
-        search_api_list=args.search_api,
-        keyword=args.keywords,
-        ontology_list=args.ontologies,
-    )
-
-
-if __name__ == "__main__":
-    main()
