@@ -1,29 +1,14 @@
 """
-Purpose: define apis
-    define harmonization
-    define building of url(word search, not filtering)
+Ontology Lookup Service (OLS) API Integration
 
-Level to filter? Return data for front end to cache and leave the filter/sort up to them
+This script defines the `OLSSearchAPI` class that interacts with the Ontology Lookup Service (OLS) API to perform ontology searches. The class provides methods to:
+- Construct search URLs with query parameters.
+- Fetch paginated search results from the OLS API.
+- Harmonize and structure raw results into a standardized format.
 
-Any need to limit results at the ontology api request level? 
-
-Response format - collected from the API
-    Code
-    Ontology
-    Curie
-    Code Display
-    Code UrL (https://ontobee.org/ontology/NCIT?iri=http://purl.obolibrary.org/obo/NCIT_C17459)
-    Code Description
-Front end response additions added to the data in search.py
-    Number of codes (total)
-    Number of codes(per ontology)
-    Response limit
-
-Does there need to be a function that recognizes a code searched for, rather than a display/keyword?
 """
 from search_dragon.external_apis import OntologyAPI
-from collections import Counter
-from search_dragon import logger
+from search_dragon import logger, fetch_data
 
 OLS_API_BASE_URL = "https://www.ebi.ac.uk/ols4/api/"
 OLS_API = "ols"
@@ -33,15 +18,57 @@ class OLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(base_url=OLS_API_BASE_URL, api_id=OLS_API, api_name=OLS_NAME)
 
-    # Set variables for each api here
-    # Each api with own file in sources
-    # If no ontologies - include only the special ontology list
+    def collect_data(self, search_url):
+        """
+        Fetch and aggregate paginated data from the provided search endpoint.
+
+        Args:
+            search_url: The base URL for the search API (e.g., "http://www.ebi.ac.uk/ols4/api/search?q=keyword").
+        """
+        raw_data = []
+        rows=500 # Max rows allowed by the OLS
+        start = 0
+        total_results = None
+
+        try:
+            while total_results is None or start < total_results:
+                paginated_url = f"{search_url}&rows={rows}&start={start}"
+                logger.info(f"Fetching data from {paginated_url}")
+
+                data = fetch_data(paginated_url)
+                if not data:
+                    logger.warning(f"No data received for start index {start}.")
+                    break
+
+                results = data.get('response', {}).get('docs', [])
+                raw_data.extend(results)
+
+                if total_results is None:
+                    total_results = data.get('response', {}).get('numFound', 0)
+                    logger.info(f"Total results found: {total_results}")
+
+                logger.info(f"Retrieved {len(results)} results (start: {start}).")
+
+                start += rows
+
+        except Exception as e:
+            logger.error(f"Error fetching data from {search_url}: {e}")
+            return []
+
+        return raw_data
+
 
     def format_keyword(self, keywords):
         """
-        Will ensure the keyword is acceptable and apply any fuzzy match
-        q=cancer+brain%20cancer
-        Setting keyword as a list for eventual fuzzy match capability
+        Formats the provided keywords for the search query.
+
+        Args:
+            keywords (str): The search terms
+
+        Returns:
+            The formatted query parameter to be inserted into the search url.
+        
+        Example return: "q=brain%20cancer"
         """
 
         keywords = keywords.replace(" ","%20")
@@ -51,7 +78,15 @@ class OLSSearchAPI(OntologyAPI):
         return keyword_param
     
     def get_ontology_keys(self, ontology_data):
-        """ """
+        """ 
+        Retrieves the keys (ontology names) from the provided ontology data.
+
+        Args:
+            ontology_data (dict): A dictionary containing the previously curated ontology data.
+
+        Returns:
+            list: A list of ontology keys.
+        """
         ontology_keys = ontology_data.keys()
         
         ontology_keys_list = list(ontology_keys)
@@ -60,10 +95,16 @@ class OLSSearchAPI(OntologyAPI):
 
     def format_ontology(self, ontology_data):
         """
-        Add the included ontologies to the search url. User preferred ontologies
-        will be selected for in the combined data curation stage.
+        Formats the included ontologies into a query parameter for the search URL.
+
+        Args:
+            ontology_data (dict): A dictionary containing ontology data.
+
+        Returns:
+            str: The formatted ontology query parameter
+             
+        Example return: "ontology=uberon,ma"
         """
-        #TODO get the list from the firestore
         included_ontologies = self.get_ontology_keys(ontology_data)
         logger.info(f"onto keys {included_ontologies}")
 
@@ -74,12 +115,15 @@ class OLSSearchAPI(OntologyAPI):
         return ontology_param
 
     def build_url(self, keywords, ontology_data):
-        """Expected format:
-        http://www.ebi.ac.uk/ols4/api/search?q={q}&ontology={ontology}
-        http://www.ebi.ac.uk/ols4/api/search?q={q}+{q}&ontology={ontology},{ontology}
+        """
+        Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 
-        # account for empty query params
-        # Maybe make the query params in the format functions
+        Args:
+            keywords (str): The search keyword(s).
+            ontology_data (dict): The ontology data to be included in the search.
+
+        Returns:
+            str: The complete search URL.
         """
         url_blocks = []
         url_blocks.append(f"{self.base_url}search?")
@@ -94,23 +138,32 @@ class OLSSearchAPI(OntologyAPI):
         return complete_url
     
     def harmonize_data(self, raw_results, ontology_data):
-        # If raw_results is a list, iterate over it
+        """
+        Harmonizes the raw API results into a standardized format for further processing.
+
+        Args:
+            raw_results (dict or list): Raw results returned from the OLS API.
+            ontology_data (dict): The ontology data used to get ontology systems
+
+        Returns:
+            dict: A dictionary containing the harmonized data.
+        """
         if isinstance(raw_results, list):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
-        
+
+        # Get the ontology prefix from the raw result
+        ontology_prefix = raw_results.get("ontology_prefix")
+
+        # Retrieve the corresponding value from ontology_data
+        system = ontology_data.get(ontology_prefix)
+
         harmonized_data = {
             "code": raw_results.get("obo_id"),
-            "system": None, #TODO get from firestore
+            "system": system,
             "code_iri": raw_results.get("iri"),
             "display": raw_results.get("label"),
             "description": raw_results.get("description", []),
-            "ontology_prefix": raw_results.get("ontology_prefix"),
-
+            "ontology_prefix": ontology_prefix,
         }
 
         return harmonized_data
-    
-    # # TODO 
-    # def apply_fuzzy_match():
-    #     """Create more keywords to search for."""
-    #     pass

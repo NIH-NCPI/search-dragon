@@ -1,7 +1,5 @@
 import logging
 import requests
-from datetime import datetime
-import time
 
 LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 

@@ -1,23 +1,24 @@
 """
-Run api requests in parallel?
-
-What info needs to come from front end(optional/required)
-    Search - keyword - required single string at this point(list later for fuzzy matches)
-    Filter - ontology(s) - optional - list
-    Fuzzy search as option? - future addition - optional
+Provides the modular framework for searching across multiple ontology APIs.
 """
 
 from search_dragon import logger
 from search_dragon.external_apis import OntologyAPI
 from search_dragon.external_apis.ols_api import OLSSearchAPI
 from search_dragon.result_structure import generate_response
-from search_dragon.curate_combined_data import curate_combined_data
 import argparse
 
 SEARCH_APIS = [{"ols": OLSSearchAPI}]
 
-
 def get_api_instance(search_api_list=None):
+    '''Creates instances of ontology API classes based on the provided list of APIs. If no list is provided, instances of all available APIs are created.
+
+    Args:
+    search_api_list: List of API names to initialize. Defaults to None (initialize all available APIs).
+    
+    Returns:
+    api_instances: A list of instantiated API classes.
+    '''
     api_instances = []
 
     if search_api_list is None:
@@ -42,8 +43,16 @@ def get_api_instance(search_api_list=None):
 
 def run_search(ontology_data, keyword, ontology_list=None, search_api_list=None):
     """
-    The master function
-
+    The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
+    
+    Args:
+    ontology_data (dict): Previously curated list of ontologies. Locutus_utilities - seed data
+    keyword (str): The search term.
+    ontology_list (List[str], optional): List of ontology names preferred by the user. Defaults to None.
+    search_api_list (List[str], optional): List of API names preferred by the user or FE. Defaults to None (uses all available APIs).
+    
+    Returns:
+    dict: The final structured response containing harmonized and curated search results.
     """
     api_instances = get_api_instance(search_api_list)
 
@@ -66,11 +75,9 @@ def run_search(ontology_data, keyword, ontology_list=None, search_api_list=None)
         combined_data.extend(harmonized_data)
 
     logger.info(f"Count combined_data {len(combined_data)}")
-    # general cleaning and validation of the combined data. Not API specific
-    curated_data = curate_combined_data(combined_data, ontology_list)
 
     # Final cleaning and structuring of the combined data
-    response = generate_response(curated_data, search_url)
+    response = generate_response(combined_data, search_url, ontology_list)
     logger.info(f"{keyword}")
     logger.info(response)
 

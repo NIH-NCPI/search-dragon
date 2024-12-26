@@ -1,42 +1,7 @@
 # search-dragon
 
-**`search-dragon`** Unified API Interface for ontology search APIs.
+**`search-dragon`** Unified API Interface for ontology search APIs to be used by the locutus application.
 
-## Prerequisites
-
-## Package installation
-
-1. **Install the package and dependencies**:
-    ```bash
-    pip install git+https://github.com/NIH-NCPI/search-dragon.git
-    ```
-3. **Run a command/action**
-
-   ## Available actions:
-   * [run_search](#run_search) <br>
-
-## Commands
-### <u>run_search</u> <br>
-#### Usage
-```bash
-run_search -s <search_api> -k <keyword> -o <ontologies>
-```
-* -s, --search_api
-    * Description: APIs to include in the search
-    * Choices:
-        * `ols`: Gather data with the Ontology Lookup Service API.
-        * `all`: Gather data using all available ontology APIs.
-    * Required: No
-    * default: "all" ? TODO
-
-* -k, --keyword
-    * Description: Keyword to search against the APIs
-    * Required: No
-
-* -o, --ontologies
-    * Description: User preferred Ontologies
-    * Default: A default list of approved ontologies is provided. If none are selected, data from all ontologies on this list will be returned.
-    * Required: No
 
 ## Running the script locally or working on a branch?
 1. **Create and activate a virtual environment** (recommended):
@@ -65,6 +30,10 @@ run_search -s <search_api> -k <keyword> -o <ontologies>
 
     # local
     pip install -e .
+
+    # Locutus should install using the following command.
+    pip install git+https://github.com/NIH-NCPI/search-dragon.git
+
+    # A re-install might be required while testing any changes to this repo, use this command to force the reinstall and ensure the latest version.
+    pip install --force-reinstall --no-cache-dir git+https://github.com/NIH-NCPI/search-dragon.git
     ```
-3. **Run commands**<br>
-    Run the command from the root of the directory. Checkout data/logs while troubleshooting. 

@@ -1,13 +1,9 @@
-
-"""Define structure of the return
-Handle nulls here orrrr in the harmonization stage...
-Also includes any transformations required. and room to grow some validation
-of results. - considering dirty api data
-Might want to include something like locutus Coding?
+"""
+Generate the final result response, and any final validation.
 """
 from collections import Counter
 
-def generate_response(data, search_url):
+def generate_response(data, search_url, ontology_list=None):
     ontology_counts, results_count = get_code_counts(data)
 
     structured_data = {"search_query": search_url,
@@ -29,7 +25,7 @@ def get_code_counts(data):
 
 def validate_response():
     """
-    NULLs have been handled, no duplicates ...
+    NULLs have been handled, no duplicates etc.
     """
     pass
 
