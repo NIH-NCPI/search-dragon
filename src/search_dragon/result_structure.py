@@ -16,10 +16,10 @@ def get_code_counts(data):
     """
     Count occurrences of each ontology in the code field of the data.
     """
-    # Extract ontology prefixes from the 'code' field
-    count = Counter(item["code"].split(":")[0] for item in data)
+    # Extract ontology prefixes
+    count = Counter(item["ontology_prefix"] for item in data)
     ontology_counts = dict(count)
-    
+
     results_counts = len(data)
     return ontology_counts, results_counts
 
@@ -28,5 +28,3 @@ def validate_response():
     NULLs have been handled, no duplicates etc.
     """
     pass
-
-
