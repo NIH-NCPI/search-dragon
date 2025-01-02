@@ -10,7 +10,8 @@ import argparse
 
 SEARCH_APIS = [{"ols": OLSSearchAPI}]
 
-def get_api_instance(search_api_list=None):
+
+def get_api_instance(search_api_list):
     '''Creates instances of ontology API classes based on the provided list of APIs. If no list is provided, instances of all available APIs are created.
 
     Args:
@@ -21,17 +22,12 @@ def get_api_instance(search_api_list=None):
     '''
     api_instances = []
 
-    if search_api_list is None:
+    # Process only the APIs in the provided list
+    for search_api in search_api_list:
         for api_dict in SEARCH_APIS:
-            for api_class in api_dict.values():
-                api_instances.append(api_class())
-    else:
-        # Process only the APIs in the provided list
-        for search_api in search_api_list:
-            for api_dict in SEARCH_APIS:
-                if search_api in api_dict:
-                    api_instances.append(api_dict[search_api]())
-                    break
+            if search_api in api_dict:
+                api_instances.append(api_dict[search_api]())
+                break
             else:
                 # Raise an error if the API is not found
                 message = f"Ontology API '{search_api}' is not recognized."
@@ -41,7 +37,7 @@ def get_api_instance(search_api_list=None):
     return api_instances
 
 
-def run_search(ontology_data, keyword, ontology_list=None, search_api_list=None):
+def run_search(ontology_data, keyword, ontology_list, search_api_list):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
     
@@ -54,13 +50,16 @@ def run_search(ontology_data, keyword, ontology_list=None, search_api_list=None)
     Returns:
     dict: The final structured response containing harmonized and curated search results.
     """
+
+    logger.info(f"ontology_list:{ontology_list}")
+
     api_instances = get_api_instance(search_api_list)
 
     combined_data = []
     for api_instance in api_instances:
 
         # Generate the search url
-        search_url = api_instance.build_url(keyword, ontology_data)
+        search_url = api_instance.build_url(keyword, ontology_list)
         logger.info(f"URL:{search_url}")
 
         # Fetch the data
