@@ -9,7 +9,8 @@ def generate_response(data, search_url, ontology_list=None):
     structured_data = {"search_query": search_url,
                        "results": data,
                        "results_per_ontology": ontology_counts,
-                       "results_count": results_count}
+                       "results_count": results_count,
+                       "more_results_available": True} #TODO This should not be hard coded.
     return structured_data
 
 def get_code_counts(data):

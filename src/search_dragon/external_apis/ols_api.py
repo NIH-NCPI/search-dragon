@@ -76,51 +76,33 @@ class OLSSearchAPI(OntologyAPI):
         keyword_param=f"q={keywords}"
 
         return keyword_param
-    
-    def get_ontology_keys(self, ontology_data):
-        """ 
-        Retrieves the keys (ontology names) from the provided ontology data.
 
-        Args:
-            ontology_data (dict): A dictionary containing the previously curated ontology data.
-
-        Returns:
-            list: A list of ontology keys.
-        """
-        ontology_keys = ontology_data.keys()
-        
-        ontology_keys_list = list(ontology_keys)
-
-        return ontology_keys_list
-
-    def format_ontology(self, ontology_data):
+    def format_ontology(self, ontology_list):
         """
         Formats the included ontologies into a query parameter for the search URL.
 
         Args:
-            ontology_data (dict): A dictionary containing ontology data.
+            ontology_list (dict): A dictionary containing ontology data.
 
         Returns:
             str: The formatted ontology query parameter
              
         Example return: "ontology=uberon,ma"
         """
-        included_ontologies = self.get_ontology_keys(ontology_data)
-        logger.info(f"onto keys {included_ontologies}")
 
-        formatted_ontologies = ",".join(included_ontologies)
+        formatted_ontologies = ",".join(ontology_list)
         
         ontology_param =f"ontology={formatted_ontologies}"
         
         return ontology_param
 
-    def build_url(self, keywords, ontology_data):
+    def build_url(self, keywords, ontology_list):
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 
         Args:
             keywords (str): The search keyword(s).
-            ontology_data (dict): The ontology data to be included in the search.
+            ontology_list (dict): The ontology data to be included in the search.
 
         Returns:
             str: The complete search URL.
@@ -129,7 +111,7 @@ class OLSSearchAPI(OntologyAPI):
         url_blocks.append(f"{self.base_url}search?")
 
         keyword_param = self.format_keyword(keywords)
-        ontology_param = self.format_ontology(ontology_data)
+        ontology_param = self.format_ontology(ontology_list)
 
         # Join the query params with & then join the params to the base url
         url_blocks.append("&".join([keyword_param,ontology_param]))
@@ -154,7 +136,7 @@ class OLSSearchAPI(OntologyAPI):
         # Get the ontology prefix from the raw result
         ontology_prefix = raw_results.get("ontology_prefix")
 
-        # Retrieve the corresponding value from ontology_data
+        # Retrieve the corresponding value from ontology_list
         system = ontology_data.get(ontology_prefix)
 
         harmonized_data = {
