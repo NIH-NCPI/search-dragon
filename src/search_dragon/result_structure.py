@@ -61,23 +61,29 @@ def remove_duplicates(data):
 def validate_data(data):
     """
     Handle nulls in the data. Ensure all missing data is handled and returned
-    with the appropriate dtype.
+    with the appropriate dtype. Specifically handles `description` as an array.
     """
     default_values = {
         "code": "",
         "system": "",
         "curie_iri": "",
         "display": "",
-        "description": "",
+        "description": [],  # Default to an empty list
         "ontology_prefix": "",
     }
 
     validated_data = []
     for item in data:
-        # If None the item is converted to an empty string
-        validated_item = {
-            key: str(item.get(key, default)) for key, default in default_values.items()
-        }
+        validated_item = {}
+        for key, default in default_values.items():
+            value = item.get(key, default)
+
+            if key == "description" and not isinstance(value, list):
+                # Convert `description` to a list if it's not already
+                value = [value] if value else []
+
+            validated_item[key] = value
+
         validated_data.append(validated_item)
 
     return validated_data
