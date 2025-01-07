@@ -18,45 +18,61 @@ class OLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(base_url=OLS_API_BASE_URL, api_id=OLS_API, api_name=OLS_NAME)
 
-    def collect_data(self, search_url):
+    def collect_data(self, search_url, results_per_page, start_index):
         """
-        Fetch and aggregate paginated data from the provided search endpoint.
+        Fetch a single page of data from the provided search endpoint.
 
         Args:
             search_url: The base URL for the search API (e.g., "http://www.ebi.ac.uk/ols4/api/search?q=keyword").
+            results_per_page: Number of results to fetch in this request (max allowed: 500).
+            row_start: The starting row index for fetching data.
+
+        Returns:
+            Tuple:
+                - raw_data (list): Results from the requested page.
+                - more_results_available (bool): Whether more results are available.
         """
         raw_data = []
-        rows=500 # Max rows allowed by the OLS
-        start = 0
-        total_results = None
+        results_per_page = int(results_per_page)
+        start_index = int(start_index)
+        total_results = 0
+        more_results_available = False
+
+        if results_per_page > 500:
+            logger.info(
+                f"Max rows allowed by OLS is 500. results_per_page: {results_per_page} could be causing an issue."
+            )
 
         try:
-            while total_results is None or start < total_results:
-                paginated_url = f"{search_url}&rows={rows}&start={start}"
-                logger.info(f"Fetching data from {paginated_url}")
+            paginated_url = f"{search_url}&rows={results_per_page}&start={start_index}"
+            logger.info(f"Fetching data from {paginated_url}")
 
-                data = fetch_data(paginated_url)
-                if not data:
-                    logger.warning(f"No data received for start index {start}.")
-                    break
+            data = fetch_data(paginated_url)
+            
 
-                results = data.get('response', {}).get('docs', [])
-                raw_data.extend(results)
 
-                if total_results is None:
-                    total_results = data.get('response', {}).get('numFound', 0)
-                    logger.info(f"Total results found: {total_results}")
+            results = data.get("response", {}).get("docs", [])
+            raw_data.extend(results)
 
-                logger.info(f"Retrieved {len(results)} results (start: {start}).")
+            total_results = data.get("response", {}).get("numFound", 0)
+            logger.info(f"Total results found: {total_results}")
+            logger.info(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
-                start += rows
+                        # Check if the start_index exceeds total results
+            if start_index >= total_results:
+                message = f"start_index ({start_index}) exceeds total available results ({total_results})."
+                logger.error(message)
+                raise ValueError(message)
+
+            # Check if more results are available after this request.
+            n_results_used = start_index + results_per_page + 1
+            more_results_available = n_results_used < total_results
 
         except Exception as e:
-            logger.error(f"Error fetching data from {search_url}: {e}")
-            return []
+            logger.error(f"Error fetching data from {paginated_url}: {e}")
+            return [], more_results_available
 
-        return raw_data
-
+        return raw_data, more_results_available
 
     def format_keyword(self, keywords):
         """
@@ -91,9 +107,9 @@ class OLSSearchAPI(OntologyAPI):
         """
 
         formatted_ontologies = ",".join(ontology_list)
-        
+
         ontology_param =f"ontology={formatted_ontologies}"
-        
+
         return ontology_param
 
     def build_url(self, keywords, ontology_list):
@@ -118,7 +134,7 @@ class OLSSearchAPI(OntologyAPI):
         complete_url = "".join(url_blocks)
 
         return complete_url
-    
+
     def harmonize_data(self, raw_results, ontology_data):
         """
         Harmonizes the raw API results into a standardized format for further processing.
