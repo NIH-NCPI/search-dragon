@@ -66,7 +66,7 @@ def validate_data(data):
     default_values = {
         "code": "",
         "system": "",
-        "curie_iri": "",
+        "code_iri": "",
         "display": "",
         "description": [],  # Default to an empty list
         "ontology_prefix": "",
