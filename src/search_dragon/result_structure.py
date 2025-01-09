@@ -48,7 +48,7 @@ def remove_duplicates(data):
         code = item.get("code")
 
         # Check if code starts with the ontology prefix, if it does not, excude and log the record
-        if not code.startswith(ontology_prefix):
+        if not code.lower().startswith(ontology_prefix.lower()):
             excluded_data.append(item)
         else:
             filtered_data.append(item)
