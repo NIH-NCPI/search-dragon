@@ -5,10 +5,11 @@ Provides the modular framework for searching across multiple ontology APIs.
 from search_dragon import logger
 from search_dragon.external_apis import OntologyAPI
 from search_dragon.external_apis.ols_api import OLSSearchAPI
+from search_dragon.external_apis.umls_api import UMLSSearchAPI
 from search_dragon.result_structure import generate_response
 import argparse
 
-SEARCH_APIS = [{"ols": OLSSearchAPI}]
+SEARCH_APIS = [{"ols": OLSSearchAPI},{"umls": UMLSSearchAPI}]
 
 
 def get_api_instance(search_api_list):
@@ -22,19 +23,19 @@ def get_api_instance(search_api_list):
     '''
     api_instances = []
 
-    # Process only the APIs in the provided list
+    available_apis = {key: value for api_dict in SEARCH_APIS for key, value in api_dict.items()}
+
     for search_api in search_api_list:
-        for api_dict in SEARCH_APIS:
-            if search_api in api_dict:
-                api_instances.append(api_dict[search_api]())
-                break
-            else:
-                # Raise an error if the API is not found
-                message = f"Ontology API '{search_api}' is not recognized."
-                logger.info(message)
-                raise ValueError(message)
+        if search_api in available_apis:
+            api_instances.append(available_apis[search_api]())
+        else:
+            # Raise an error if the API is not found
+            message = f"Ontology API '{search_api}' is not recognized."
+            logger.error(message)
+            raise ValueError(message)
 
     return api_instances
+
 
 
 def run_search(ontology_data, keyword, ontology_list, search_api_list, results_per_page, start_index):
@@ -51,15 +52,13 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
     dict: The final structured response containing harmonized and curated search results.
     """
 
-    logger.info(f"ontology_list:{ontology_list}")
-
     api_instances = get_api_instance(search_api_list)
 
     combined_data = []
     for api_instance in api_instances:
 
         # Generate the search url
-        search_url = api_instance.build_url(keyword, ontology_list)
+        search_url = api_instance.build_url(keyword, ontology_list, start_index, results_per_page)
         logger.info(f"URL:{search_url}")
 
         # Fetch the data
@@ -70,15 +69,17 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
         harmonized_data = api_instance.harmonize_data(api_results, ontology_data)
         logger.info(f"Count harmonized_data: {len(harmonized_data)}")
 
+        # Apply speciallized cleaning prior to combining data.
+        dups_removed = api_instance.remove_duplicates(harmonized_data)
+
         # Combine the ontology api data
-        combined_data.extend(harmonized_data)
+        combined_data.extend(dups_removed)
 
     logger.info(f"Count combined_data {len(combined_data)}")
 
     # Final cleaning and structuring of the combined data
-    response = generate_response(combined_data, search_url, more_results_available)
+    response = generate_response(combined_data, search_url, more_results_available, api_instances)
 
     logger.info(f"keyword: {keyword}")
-    # logger.info(response)
 
     return response

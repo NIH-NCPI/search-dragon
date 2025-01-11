@@ -6,11 +6,12 @@ from search_dragon import logger
 
 
 def generate_response(
-    data, search_url, more_results_available
+    data, search_url, more_results_available, api_instances
 ):
     logger.info(f"Count fetched_data {len(data)}")
 
     ontology_counts, results_count = get_code_counts(data)
+
     cleaned_data = curate_data(data)
 
     structured_data = {
@@ -35,25 +36,33 @@ def get_code_counts(data):
     return ontology_counts, results_counts
 
 
-def remove_duplicates(data):
+
+def remove_duplicates(self, data):
     """
-    Some ontologies include codes from within other ontologies. Filter out those
-    api results where the ontology_prefix(code prefix ex: MONDO) does not match
-    the ontology code for the record.
+    Remove duplicate records where the 'uri' field is the same.
+
+    Args:
+        data (list): List of records to filter.
+
+    Returns:
+        list: Filtered data with duplicates removed.
     """
+    seen_uris = set()
     filtered_data = []
     excluded_data = []
-    for item in data:
-        ontology_prefix = item.get("ontology_prefix")
-        code = item.get("code")
 
-        # Check if code starts with the ontology prefix, if it does not, excude and log the record
-        if not code.lower().startswith(ontology_prefix.lower()):
+    for item in data:
+        uri = item.get("code_iri")
+        if uri in seen_uris:
             excluded_data.append(item)
         else:
+            seen_uris.add(uri)
             filtered_data.append(item)
 
-    message = f"Records({(len(excluded_data))}) are excluded because the code does not start with the ontology_prefix"
+    # Log the excluded records count
+    message = (
+        f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.{excluded_data}"
+    )
     logger.info(message)
 
     return filtered_data
@@ -94,14 +103,7 @@ def curate_data(data):
     """
     logger.info(f"data length {len(data)}")
 
-    # handle duplicates
-    dup_cleaned = remove_duplicates(data)
-
-    # sanity check
-
-    logger.info(f"data length after removing duplicates {len(dup_cleaned)}")
-
     # handle nulls and data types
-    cleaned_data = validate_data(dup_cleaned)
+    cleaned_data = validate_data(data)
 
     return cleaned_data

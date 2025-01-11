@@ -1,5 +1,4 @@
 import logging
-import requests
 
 LOGGING_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 
@@ -16,12 +15,3 @@ if not logger.handlers:
     # Add handlers to the logger
     logger.addHandler(console_handler)
 
-
-def fetch_data(url):
-    """ """
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Failed to fetch data: {response.status_code}")
-        return None
