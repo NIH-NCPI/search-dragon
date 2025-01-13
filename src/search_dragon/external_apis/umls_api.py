@@ -10,18 +10,14 @@ This script defines the `UMLSSearchAPI` class that interacts with the umls API t
 
 from search_dragon.external_apis import OntologyAPI
 from search_dragon import logger
-
-UMLS_API_BASE_URL = "https://uts-ws.nlm.nih.gov/rest/search/current"
-UMLS_API = "umls"
-UMLS_NAME = "Unified Medical Language System"
-
+import os
 
 class UMLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(
-            base_url=UMLS_API_BASE_URL,
-            api_id=UMLS_API,
-            api_name=UMLS_NAME,
+            base_url="https://uts-ws.nlm.nih.gov/rest/search/current",
+            api_id= "umls",
+            api_name="Unified Medical Language System",
         )
         self.total_results_id='recCount'
 
@@ -114,12 +110,21 @@ class UMLSSearchAPI(OntologyAPI):
         ontology_param = f"sabs={formatted_ontologies}"
 
         return ontology_param
-
+    
+    def get_api_key(self):
+        API_KEY = os.getenv("UMLS_API_KEY")
+        if not API_KEY:
+            raise ValueError(
+                f"API_KEY for 'umls' is not set in the environment variables."
+            )
+        else:
+            return API_KEY
+        
     def format_key(self):
         """
         Formats the api key into a format readable by the api.
         """
-        api_key = self.get_api_key(UMLS_API)
+        api_key = self.get_api_key()
         key_param = f"apiKey={api_key}"
 
         return key_param

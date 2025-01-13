@@ -24,9 +24,11 @@
 2. **Install the package** <br>
     If working on a new feature it is possible to install a package version within
     the remote or local branch
+    **NOTE** If testing changes to search-dragon in `locutus` don't forget to deploy a `locutus` branch with the correct `search-dragon` version in the requirements.txt file! 
+    **NOTE** Any new env variables created, e.g. api keys, will need to be added to the `locutus` deployment files.
       ```
     # remote
-    pip install git+https://github.com/NIH-NCPI/locutus_utilities.git@{branch_name}
+    pip install git+https://github.com/NIH-NCPI/search-dragon.git@{branch_name}
 
     # local
     pip install -e .

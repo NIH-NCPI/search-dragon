@@ -8,16 +8,6 @@ class OntologyAPI:
         self.api_id = api_id
         self.api_name = api_name
 
-    def get_api_key(self, api_id):
-        if api_id == "umls":
-            API_KEY = os.getenv("UMLS_API_KEY")
-        if not API_KEY:
-            raise ValueError(
-                "API_KEY for {api_id} is not set in the environment variables."
-            )
-        else:
-            return API_KEY
-        
     def fetch_data(self, url):
         """ """
         response = requests.get(url)
@@ -56,7 +46,3 @@ class OntologyAPI:
         logger.info(message)
 
         return filtered_data
-
-
-            
-
