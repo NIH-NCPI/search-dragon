@@ -10,16 +10,12 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 from search_dragon.external_apis import OntologyAPI
 from search_dragon import logger
 
-OLS_API_BASE_URL = "https://www.ebi.ac.uk/ols4/api/"
-OLS_API = "ols"
-OLS_NAME = "Ontology Lookup Service"
-
 class OLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(
-            base_url=OLS_API_BASE_URL,
-            api_id=OLS_API,
-            api_name=OLS_NAME,
+            base_url="https://www.ebi.ac.uk/ols4/api/",
+            api_id="ols",
+            api_name="Ontology Lookup Service",
         )
         self.total_results_id = 'numFound'
 
@@ -53,7 +49,7 @@ class OLSSearchAPI(OntologyAPI):
             logger.info(f"Fetching data from {paginated_url}")
 
             data = self.fetch_data(paginated_url)
-            
+
             results = data.get("response", {}).get("docs", [])
             raw_data.extend(results)
 
