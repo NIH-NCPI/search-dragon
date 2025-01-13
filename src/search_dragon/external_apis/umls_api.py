@@ -1,32 +1,34 @@
 """
-Ontology Lookup Service (OLS) API Integration
+UMLS (Unified Medical Language System) API Integration
 
-This script defines the `OLSSearchAPI` class that interacts with the Ontology Lookup Service (OLS) API to perform ontology searches. The class provides methods to:
+This script defines the `UMLSSearchAPI` class that interacts with the umls API to perform ontology searches. The class provides methods to:
 - Construct search URLs with query parameters.
-- Fetch paginated search results from the OLS API.
+- Fetch paginated search results from the UMLS API.
 - Harmonize and structure raw results into a standardized format.
 
 """
+
 from search_dragon.external_apis import OntologyAPI
 from search_dragon import logger
+import os
 
-class OLSSearchAPI(OntologyAPI):
+class UMLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(
-            base_url="https://www.ebi.ac.uk/ols4/api/",
-            api_id="ols",
-            api_name="Ontology Lookup Service",
+            base_url="https://uts-ws.nlm.nih.gov/rest/search/current",
+            api_id= "umls",
+            api_name="Unified Medical Language System",
         )
-        self.total_results_id = 'numFound'
+        self.total_results_id='recCount'
 
     def collect_data(self, search_url, results_per_page, start_index):
         """
         Fetch a single page of data from the provided search endpoint.
 
         Args:
-            search_url: The base URL for the search API (e.g., "http://www.ebi.ac.uk/ols4/api/search?q=keyword").
-            results_per_page: Number of results to fetch in this request (max allowed: 500).
-            row_start: The starting row index for fetching data.
+            search_url (str): The base URL for the search API.
+            results_per_page (int): Number of results to fetch in this request.
+            start_index (int): The starting page number for fetching data.
 
         Returns:
             Tuple:
@@ -36,24 +38,22 @@ class OLSSearchAPI(OntologyAPI):
         raw_data = []
         results_per_page = int(results_per_page)
         start_index = int(start_index)
-        total_results = 0
         more_results_available = False
 
-        if results_per_page > 500:
-            logger.info(
-                f"Max rows allowed by OLS is 500. results_per_page: {results_per_page} could be causing an issue."
-            )
-
         try:
-            paginated_url = f"{search_url}&rows={results_per_page}&start={start_index}"
+            # Construct the paginated URL
+            paginated_url = f"{search_url}"
             logger.info(f"Fetching data from {paginated_url}")
 
+            # Fetch data
             data = self.fetch_data(paginated_url)
+            logger.info(f"Returned data: {data}")
 
-            results = data.get("response", {}).get("docs", [])
+            # Extract results
+            results = data.get("result", {}).get("results", [])
             raw_data.extend(results)
-
-            total_results = data.get("response", {}).get(self.total_results_id, 0)
+            
+            total_results = data.get("result", {}).get(self.total_results_id, 0)
             logger.info(f"Total results found: {total_results}")
             logger.info(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
@@ -82,13 +82,13 @@ class OLSSearchAPI(OntologyAPI):
 
         Returns:
             The formatted query parameter to be inserted into the search url.
-        
+
         Example return: "q=brain%20cancer"
         """
 
-        keywords = keywords.replace(" ","%20")
+        keywords = keywords.replace(" ", "%20")
 
-        keyword_param=f"q={keywords}"
+        keyword_param = f"string={keywords}"
 
         return keyword_param
 
@@ -101,21 +101,39 @@ class OLSSearchAPI(OntologyAPI):
 
         Returns:
             str: The formatted ontology query parameter
-             
+
         Example return: "ontology=uberon,ma"
         """
 
         formatted_ontologies = ",".join(ontology_list)
 
-        ontology_param =f"ontology={formatted_ontologies}"
+        ontology_param = f"sabs={formatted_ontologies}"
 
         return ontology_param
+    
+    def get_api_key(self):
+        API_KEY = os.getenv("UMLS_API_KEY")
+        if not API_KEY:
+            raise ValueError(
+                f"API_KEY for 'umls' is not set in the environment variables."
+            )
+        else:
+            return API_KEY
+        
+    def format_key(self):
+        """
+        Formats the api key into a format readable by the api.
+        """
+        api_key = self.get_api_key()
+        key_param = f"apiKey={api_key}"
+
+        return key_param
 
     def format_results_per_page(self, results_per_page):
         """
         Formats the results_per_page into a format readable by the api.
         """
-        page_size_param = f"rows={results_per_page}"
+        page_size_param = f"pageSize={results_per_page}"
 
         return page_size_param
 
@@ -123,9 +141,17 @@ class OLSSearchAPI(OntologyAPI):
         """
         Formats the start_index into a format readable by the api.
         """
-        start_param = f"start={start_index}"
+        start_param = f"pageNumber={start_index}"
 
         return start_param
+
+    def format_api_specific_params(self):
+        """
+        Formats the parameters that aren't required across all apis
+        """
+        return_type_param = f"returnIdType=code"
+
+        return return_type_param
 
     def build_url(self, keywords, ontology_list, start_index, results_per_page):
         """
@@ -139,16 +165,28 @@ class OLSSearchAPI(OntologyAPI):
             str: The complete search URL.
         """
         url_blocks = []
-        url_blocks.append(f"{self.base_url}search?")
+        url_blocks.append(f"{self.base_url}?")
 
         keyword_param = self.format_keyword(keywords)
         ontology_param = self.format_ontology(ontology_list)
         start_param = self.format_start_index(start_index)
         page_size_param = self.format_results_per_page(results_per_page)
+        return_type_param = self.format_api_specific_params()
+
+        key_param = self.format_key()
 
         # Join the query params with & then join the params to the base url
         url_blocks.append(
-            "&".join([keyword_param, ontology_param, start_param, page_size_param])
+            "&".join(
+                [
+                    keyword_param,
+                    ontology_param,
+                    start_param,
+                    page_size_param,
+                    return_type_param,
+                    key_param,
+                ]
+            )
         )
         complete_url = "".join(url_blocks)
 
@@ -169,17 +207,19 @@ class OLSSearchAPI(OntologyAPI):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
         # Get the ontology prefix from the raw result
-        ontology_prefix = raw_results.get("ontology_prefix")
+        ontology_prefix = raw_results.get("rootSource")
 
         # Retrieve the corresponding value from ontology_list
         system = ontology_data.get(ontology_prefix)
 
         harmonized_data = {
-            "code": raw_results.get("obo_id"),
-            "system": system,
-            "code_iri": raw_results.get("iri"),
-            "display": raw_results.get("label"),
-            "description": raw_results.get("description", []),
+            "code": raw_results.get(
+                "ui", ""
+            ),  # The umls Concept Unique Identifier (CUI)
+            "system": system,  # This is the ontology system.
+            "code_iri": raw_results.get("uri"),
+            "display": raw_results.get("name"),
+            "description": raw_results.get("name", []),
             "ontology_prefix": ontology_prefix,
         }
 
