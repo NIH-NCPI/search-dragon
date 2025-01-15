@@ -3,6 +3,7 @@ Generate the final result response, and any final validation.
 """
 from collections import Counter
 from search_dragon import logger
+import re
 
 
 def generate_response(
@@ -14,8 +15,10 @@ def generate_response(
 
     cleaned_data = curate_data(data)
 
+    clean_search_url = clean_url(search_url)
+
     structured_data = {
-        "search_query": search_url,
+        "search_query": clean_search_url,
         "results": cleaned_data,
         "results_per_ontology": ontology_counts,
         "results_count": results_count,
@@ -107,3 +110,16 @@ def curate_data(data):
     cleaned_data = validate_data(data)
 
     return cleaned_data
+
+
+def clean_url(search_url):
+    """
+    Replaces any characters in a url, after 'key='(case insensitive) and
+    before an '&' character(if exists) with '{{api_key}}'
+
+    Catches the umls "apiKey="
+    """
+    api_key_pattern = r"(key=)[^&]+"
+    
+    obfuscated_url = re.sub(api_key_pattern, r"\1{{api_key}}", search_url, flags=re.IGNORECASE)
+    return obfuscated_url
