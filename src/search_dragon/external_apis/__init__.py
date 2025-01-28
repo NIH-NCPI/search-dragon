@@ -32,8 +32,8 @@ class OntologyAPI:
         excluded_data = []
 
         for item in data:
-            uri = item.get("code_iri")
-            if uri in seen_uris:
+            uri = item.get("code_iri", "")
+            if uri and uri in seen_uris:
                 excluded_data.append(item)
             else:
                 seen_uris.add(uri)
@@ -65,8 +65,8 @@ class OntologyAPI:
         # Remove records containing problem causing special characters
         try:
             for item in data:
-                code = item.get("code")
-                if any(char in code for char in special_characters):
+                code = item.get("code", "")
+                if code and any(char in code for char in special_characters):
                     excluded_problem_data.append(item)
                 else:
                     filtered_data.append(item)
