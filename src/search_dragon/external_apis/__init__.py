@@ -46,3 +46,40 @@ class OntologyAPI:
         logger.info(message)
 
         return filtered_data
+
+    def remove_problem_codes(self, data):
+        """
+        Remove data where the data causes issues. 
+        See Jira issue FD-1968 for more information about backslash_codes.
+
+        Args:
+            data (list): List of records to filter.
+
+        Returns:
+            list: Data without the problem causing records.
+        """
+        filtered_data = []
+        excluded_problem_data = []
+        special_characters = ["/"]
+
+        # Remove records containing problem causing special characters
+        try:
+            for item in data:
+                code = item.get("code")
+                if any(char in code for char in special_characters):
+                    excluded_problem_data.append(item)
+                else:
+                    filtered_data.append(item)
+
+            # Log the excluded records count
+            message = (
+                f"Problem records are removed ({len(excluded_problem_data)})"
+            )
+            logger.info(message)
+
+        except Exception as e:
+            message = f"Error removing special character records: {e}"
+            logger.error(message)
+            raise Exception(message)
+
+        return filtered_data

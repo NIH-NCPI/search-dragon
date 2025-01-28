@@ -70,10 +70,10 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
         logger.info(f"Count harmonized_data: {len(harmonized_data)}")
 
         # Apply speciallized cleaning prior to combining data.
-        dups_removed = api_instance.remove_duplicates(harmonized_data)
-
+        cleaned_harmonized_data = api_instance.clean_harmonized_data(harmonized_data)
+        
         # Combine the ontology api data
-        combined_data.extend(dups_removed)
+        combined_data.extend(cleaned_harmonized_data)
 
     logger.info(f"Count combined_data {len(combined_data)}")
 
