@@ -50,7 +50,7 @@ class OntologyAPI:
     def remove_problem_codes(self, data):
         """
         Remove data where the data causes issues. 
-        See Jira issue FD-1968 for more information about backslash_codes.
+        For more on special character removal, see Jira issue(s) [FD-1968] 
 
         Args:
             data (list): List of records to filter.
