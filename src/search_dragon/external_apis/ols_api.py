@@ -184,3 +184,15 @@ class OLSSearchAPI(OntologyAPI):
         }
 
         return harmonized_data
+
+    def clean_harmonized_data(self, data):
+        """
+        Cleans the harmonized data to the specifications required for this API.
+
+        Cleans using the functions defined in the base class unless overwritten
+        in the API subclass.
+        """
+        dup_removed = self.remove_duplicates(data)
+        cleaned_data = self.remove_problem_codes(dup_removed)
+
+        return cleaned_data

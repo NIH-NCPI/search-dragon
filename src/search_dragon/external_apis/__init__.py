@@ -32,8 +32,8 @@ class OntologyAPI:
         excluded_data = []
 
         for item in data:
-            uri = item.get("code_iri")
-            if uri in seen_uris:
+            uri = item.get("code_iri", "")
+            if uri and uri in seen_uris:
                 excluded_data.append(item)
             else:
                 seen_uris.add(uri)
@@ -44,5 +44,42 @@ class OntologyAPI:
             f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.{excluded_data}"
         )
         logger.info(message)
+
+        return filtered_data
+
+    def remove_problem_codes(self, data):
+        """
+        Remove data where the data causes issues. 
+        For more on special character removal, see Jira issue(s) [FD-1968] 
+
+        Args:
+            data (list): List of records to filter.
+
+        Returns:
+            list: Data without the problem causing records.
+        """
+        filtered_data = []
+        excluded_problem_data = []
+        special_characters = ["/"]
+
+        # Remove records containing problem causing special characters
+        try:
+            for item in data:
+                code = item.get("code", "")
+                if code and any(char in code for char in special_characters):
+                    excluded_problem_data.append(item)
+                else:
+                    filtered_data.append(item)
+
+            # Log the excluded records count
+            message = (
+                f"Problem records are removed ({len(excluded_problem_data)})"
+            )
+            logger.info(message)
+
+        except Exception as e:
+            message = f"Error removing special character records: {e}"
+            logger.error(message)
+            raise Exception(message)
 
         return filtered_data
