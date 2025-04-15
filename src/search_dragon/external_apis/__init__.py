@@ -50,7 +50,7 @@ class OntologyAPI:
     def remove_problem_codes(self, data):
         """
         Remove data where the data causes issues. 
-        For more on special character removal, see Jira issue(s) [FD-1968] 
+        For more on special character removal, see Jira issue(s) [FD-1968, FD-2245] 
 
         Args:
             data (list): List of records to filter.
@@ -60,7 +60,7 @@ class OntologyAPI:
         """
         filtered_data = []
         excluded_problem_data = []
-        special_characters = ["/"]
+        special_characters = [] # slash codes are allowed as of FD-2245
 
         # Remove records containing problem causing special characters
         try:
