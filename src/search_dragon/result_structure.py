@@ -64,7 +64,7 @@ def remove_duplicates(self, data):
 
     # Log the excluded records count
     message = (
-        f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.{excluded_data}"
+        f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.Exclusions:{excluded_data}"
     )
     logger.info(message)
 
@@ -96,6 +96,14 @@ def validate_data(data):
 
             validated_item[key] = value
 
+        if validated_item["ontology_prefix"] == "ERR:CURIE":
+            logger.debug(f"CURIE:{validated_item["ontology_prefix"]} for record:{item} is not valid.")
+            continue
+
+        if validated_item["system"] == "ERR:SYSTEM":
+            logger.debug(f"SYSTEM:{validated_item["system"]} for record:{item} is not valid.")
+            continue
+
         validated_data.append(validated_item)
 
     return validated_data
@@ -104,10 +112,11 @@ def curate_data(data):
     """
     NULLs have been handled, no duplicates, data has the expected types etc.
     """
-    logger.info(f"data length {len(data)}")
 
     # handle nulls and data types
     cleaned_data = validate_data(data)
+
+    logger.info(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
 
     return cleaned_data
 
