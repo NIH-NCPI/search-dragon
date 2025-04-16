@@ -97,11 +97,11 @@ def validate_data(data):
             validated_item[key] = value
 
         if validated_item["ontology_prefix"] == "ERR:CURIE":
-            logger.debug(f"CURIE:{validated_item["ontology_prefix"]} for record:{item} is not valid.")
+            logger.debug(f"CURIE:{validated_item['ontology_prefix']} for record:{item} is not valid.")
             continue
 
         if validated_item["system"] == "ERR:SYSTEM":
-            logger.debug(f"SYSTEM:{validated_item["system"]} for record:{item} is not valid.")
+            logger.debug(f"SYSTEM:{validated_item['system']} for record:{item} is not valid.")
             continue
 
         validated_data.append(validated_item)
