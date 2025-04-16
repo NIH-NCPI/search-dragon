@@ -192,7 +192,6 @@ class OLSSearchAPI(OntologyAPI):
         Cleans using the functions defined in the base class unless overwritten
         in the API subclass.
         """
-        dup_removed = self.remove_duplicates(data)
-        cleaned_data = self.remove_problem_codes(dup_removed)
+        cleaned_data = self.remove_duplicates(data)
 
         return cleaned_data
