@@ -207,10 +207,10 @@ class UMLSSearchAPI(OntologyAPI):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
         # Get the ontology prefix from the raw result
-        ontology_prefix = raw_results.get("rootSource")
+        ontology_prefix = raw_results.get("rootSource") or "ERR:CURIE" # ERRs are caught by validate_data and not returned
 
         # Retrieve the corresponding value from ontology_list
-        system = ontology_data.get(ontology_prefix)
+        system = ontology_data.get(ontology_prefix) or "ERR:SYSTEM" # ERRs are caught by validate_data and not returned
 
         harmonized_data = {
             "code": raw_results.get(
@@ -232,7 +232,6 @@ class UMLSSearchAPI(OntologyAPI):
         Cleans using the functions defined in the base class unless overwritten
         in the API subclass.
         """
-        dup_removed = self.remove_duplicates(data)
-        cleaned_data = self.remove_problem_codes(dup_removed)
+        cleaned_data = self.remove_duplicates(data)
 
         return cleaned_data
