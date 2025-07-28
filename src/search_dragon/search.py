@@ -4,12 +4,13 @@ Provides the modular framework for searching across multiple ontology APIs.
 
 from search_dragon import logger
 from search_dragon.external_apis import OntologyAPI
+from search_dragon.external_apis.ols_code_api import OLSSearchAPICode
 from search_dragon.external_apis.ols_api import OLSSearchAPI
 from search_dragon.external_apis.umls_api import UMLSSearchAPI
 from search_dragon.result_structure import generate_response
 import argparse
 
-SEARCH_APIS = [{"ols": OLSSearchAPI},{"umls": UMLSSearchAPI}]
+SEARCH_APIS = [{"ols": OLSSearchAPI}, {"ols2": OLSSearchAPICode}, {"umls": UMLSSearchAPI}]
 
 
 def get_api_instance(search_api_list):
