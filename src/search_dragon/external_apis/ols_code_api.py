@@ -44,13 +44,13 @@ class OLSSearchAPICode(OntologyAPI):
         more_results_available = False
 
         if results_per_page > 500:
-            logger.info(
+            logger.debug(
                 f"Max rows allowed by OLS is 500. results_per_page: {results_per_page} could be causing an issue."
             )
 
         try:
             paginated_url = f"{search_url}&size={results_per_page}&page={start_index}"
-            logger.info(f"Fetching data from {paginated_url}")
+            logger.debug(f"Fetching data from {paginated_url}")
 
             data = self.fetch_data(paginated_url)
             # import pdb
@@ -59,8 +59,8 @@ class OLSSearchAPICode(OntologyAPI):
             raw_data.extend(results)
 
             total_results = data.get(self.total_results_id, 0)
-            logger.info(f"Total results found: {total_results}")
-            logger.info(f"Retrieved {len(results)} results (start_index: {start_index}).")
+            logger.debug(f"Total results found: {total_results}")
+            logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
             # Check if the start_index exceeds total results
             if start_index >= total_results:

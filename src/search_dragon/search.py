@@ -60,15 +60,15 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
 
         # Generate the search url
         search_url = api_instance.build_url(keyword, ontology_list, start_index, results_per_page)
-        logger.info(f"URL:{search_url}")
+        logger.debug(f"URL:{search_url}")
 
         # Fetch the data
         api_results, more_results_available= api_instance.collect_data(search_url, results_per_page, start_index)
-        logger.info(f"Count results: {len(api_results)}")
+        logger.debug(f"Count results: {len(api_results)}")
 
         # harmonize the api specific data into standard structure
         harmonized_data = api_instance.harmonize_data(api_results, ontology_data)
-        logger.info(f"Count harmonized_data: {len(harmonized_data)}")
+        logger.debug(f"Count harmonized_data: {len(harmonized_data)}")
 
         # Apply speciallized cleaning prior to combining data.
         cleaned_harmonized_data = api_instance.clean_harmonized_data(harmonized_data)
@@ -76,11 +76,11 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
         # Combine the ontology api data
         combined_data.extend(cleaned_harmonized_data)
 
-    logger.info(f"Count combined_data {len(combined_data)}")
+    logger.debug(f"Count combined_data {len(combined_data)}")
 
     # Final cleaning and structuring of the combined data
     response = generate_response(combined_data, search_url, more_results_available, api_instances)
 
-    logger.info(f"keyword: {keyword}")
+    logger.debug(f"keyword: {keyword}")
 
     return response
