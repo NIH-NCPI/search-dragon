@@ -1,6 +1,6 @@
 import os
 import requests
-from search_dragon import logger
+from search_dragon import logger as getlogger
 
 class OntologyAPI:
     def __init__(self, base_url, api_id, api_name):
@@ -43,6 +43,6 @@ class OntologyAPI:
         message = (
             f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.{excluded_data}"
         )
-        logger.info(message)
+        getlogger().info(message)
 
         return filtered_data
