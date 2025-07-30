@@ -43,6 +43,6 @@ class OntologyAPI:
         message = (
             f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.{excluded_data}"
         )
-        getlogger().info(message)
+        getlogger().debug(message)
 
         return filtered_data

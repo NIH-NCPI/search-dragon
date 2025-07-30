@@ -1,6 +1,10 @@
 """
 Ontology Lookup Service (OLS) API Integration
 
+This url is more reliable for searching on a code(HP:0003045)
+
+https://www.ebi.ac.uk/ols4/api/v2/entities?search=HP%3A0003045&page=2size=10
+
 This script defines the `OLSSearchAPI` class that interacts with the Ontology Lookup Service (OLS) API to perform ontology searches. The class provides methods to:
 - Construct search URLs with query parameters.
 - Fetch paginated search results from the OLS API.
@@ -8,23 +12,23 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 
 """
 from search_dragon.external_apis import OntologyAPI
-from search_dragon import logger as getlogger
+from search_dragon import logger
 
-class OLSSearchAPI(OntologyAPI):
+class OLSSearchAPICode(OntologyAPI):
     def __init__(self):
         super().__init__(
-            base_url="https://www.ebi.ac.uk/ols4/api/",
-            api_id="ols",
-            api_name="Ontology Lookup Service",
+            base_url="https://www.ebi.ac.uk/ols4/api/v2/entities",
+            api_id="ols2",
+            api_name="Ontology Lookup Service V2",
         )
-        self.total_results_id = 'numFound'
+        self.total_results_id = 'totalElements'
 
     def collect_data(self, search_url, results_per_page, start_index):
         """
         Fetch a single page of data from the provided search endpoint.
 
         Args:
-            search_url: The base URL for the search API (e.g., "http://www.ebi.ac.uk/ols4/api/search?q=keyword").
+            search_url: The base URL for the search API.
             results_per_page: Number of results to fetch in this request (max allowed: 500).
             row_start: The starting row index for fetching data.
 
@@ -33,7 +37,6 @@ class OLSSearchAPI(OntologyAPI):
                 - raw_data (list): Results from the requested page.
                 - more_results_available (bool): Whether more results are available.
         """
-        logger = getlogger()
         raw_data = []
         results_per_page = int(results_per_page)
         start_index = int(start_index)
@@ -46,15 +49,16 @@ class OLSSearchAPI(OntologyAPI):
             )
 
         try:
-            paginated_url = f"{search_url}&rows={results_per_page}&start={start_index}"
+            paginated_url = f"{search_url}&size={results_per_page}&page={start_index}"
             logger.debug(f"Fetching data from {paginated_url}")
 
             data = self.fetch_data(paginated_url)
-
-            results = data.get("response", {}).get("docs", [])
+            # import pdb
+            # pdb.set_trace()
+            results = data.get("elements", [])
             raw_data.extend(results)
 
-            total_results = data.get("response", {}).get(self.total_results_id, 0)
+            total_results = data.get(self.total_results_id, 0)
             logger.debug(f"Total results found: {total_results}")
             logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
@@ -84,12 +88,11 @@ class OLSSearchAPI(OntologyAPI):
         Returns:
             The formatted query parameter to be inserted into the search url.
         
-        Example return: "q=brain%20cancer"
         """
-
         keywords = keywords.replace(" ","%20")
+        keywords = keywords.replace(":","%3A")
 
-        keyword_param=f"q={keywords}"
+        keyword_param=f"search={keywords}"
 
         return keyword_param
 
@@ -116,7 +119,7 @@ class OLSSearchAPI(OntologyAPI):
         """
         Formats the results_per_page into a format readable by the api.
         """
-        page_size_param = f"rows={results_per_page}"
+        page_size_param = f"size={results_per_page}"
 
         return page_size_param
 
@@ -124,9 +127,10 @@ class OLSSearchAPI(OntologyAPI):
         """
         Formats the start_index into a format readable by the api.
         """
-        start_param = f"start={start_index}"
+        start_param = f"page={start_index}"
 
         return start_param
+
 
     def build_url(self, keywords, ontology_list, start_index, results_per_page):
         """
@@ -140,16 +144,23 @@ class OLSSearchAPI(OntologyAPI):
             str: The complete search URL.
         """
         url_blocks = []
-        url_blocks.append(f"{self.base_url}search?")
+        url_blocks.append(f"{self.base_url}?")
 
         keyword_param = self.format_keyword(keywords)
-        ontology_param = self.format_ontology(ontology_list)
+        # ontology_param = self.format_ontology(ontology_list)
         start_param = self.format_start_index(start_index)
         page_size_param = self.format_results_per_page(results_per_page)
 
         # Join the query params with & then join the params to the base url
         url_blocks.append(
-            "&".join([keyword_param, ontology_param, start_param, page_size_param])
+            "&".join(
+                [
+                    keyword_param,
+                    # ontology_param,
+                    start_param,
+                    page_size_param,
+                ]
+            )
         )
         complete_url = "".join(url_blocks)
 
@@ -169,19 +180,24 @@ class OLSSearchAPI(OntologyAPI):
         if isinstance(raw_results, list):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
+        # import pdb
+        # pdb.set_trace()
+
         # Get the ontology prefix from the raw result
-        ontology_prefix = raw_results.get("ontology_prefix") or "ERR:CURIE" # ERRs are caught by validate_data and not returned
+        ontology_prefix = raw_results.get("definedBy") or "ERR:CURIE" # ERRs are caught by validate_data and not returned
 
         # Retrieve the corresponding value from ontology_list
-        system = ontology_data.get(ontology_prefix) or "ERR:SYSTEM" # ERRs are caught by validate_data and not returned
+        system = ontology_data.get(ontology_prefix[0].upper()) or "ERR:SYSTEM" # ERRs are caught by validate_data and not returned
+
+        display = raw_results.get("label")[0]
 
         harmonized_data = {
-            "code": raw_results.get("obo_id"),
+            "code": raw_results.get("curie"),
             "system": system,
             "code_iri": raw_results.get("iri"),
-            "display": raw_results.get("label"),
-            "description": raw_results.get("description", []),
-            "ontology_prefix": ontology_prefix,
+            "display": display,
+            "description": display,
+            "ontology_prefix": ontology_prefix[0].upper(),
         }
 
         return harmonized_data

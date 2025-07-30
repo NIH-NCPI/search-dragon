@@ -44,19 +44,19 @@ class UMLSSearchAPI(OntologyAPI):
         try:
             # Construct the paginated URL
             paginated_url = f"{search_url}"
-            logger.info(f"Fetching data from {paginated_url}")
+            logger.debug(f"Fetching data from {paginated_url}")
 
             # Fetch data
             data = self.fetch_data(paginated_url)
-            logger.info(f"Returned data: {data}")
+            logger.debug(f"Returned data: {data}")
 
             # Extract results
             results = data.get("result", {}).get("results", [])
             raw_data.extend(results)
             
             total_results = data.get("result", {}).get(self.total_results_id, 0)
-            logger.info(f"Total results found: {total_results}")
-            logger.info(f"Retrieved {len(results)} results (start_index: {start_index}).")
+            logger.debug(f"Total results found: {total_results}")
+            logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
             # Check if the start_index exceeds total results
             if start_index >= total_results:

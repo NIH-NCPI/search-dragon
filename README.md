@@ -39,3 +39,16 @@
     # A re-install might be required while testing any changes to this repo, use this command to force the reinstall and ensure the latest version.
     pip install --force-reinstall --no-cache-dir git+https://github.com/NIH-NCPI/search-dragon.git
     ```
+
+
+  ## Notes
+  ### API usage
+  - OLSSearchAPI
+    - MapDragon tested
+    <br>
+  - OLSSearchAPICode
+    - DBT tested. 
+    - This url is more reliable for searching on a code(HP:0003045)
+    <br>
+  - UMLSSearchAPI
+    - MapDragon tested

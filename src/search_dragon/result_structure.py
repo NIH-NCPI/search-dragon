@@ -39,7 +39,6 @@ def get_code_counts(data):
     return ontology_counts, results_counts
 
 
-
 def remove_duplicates(self, data):
     """
     Remove duplicate records where the 'uri' field is the same.
@@ -66,7 +65,7 @@ def remove_duplicates(self, data):
     message = (
         f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.Exclusions:{excluded_data}"
     )
-    getlogger().info(message)
+    logger.info(message)
 
     return filtered_data
 
@@ -116,7 +115,7 @@ def curate_data(data):
     # handle nulls and data types
     cleaned_data = validate_data(data)
 
-    getlogger().info(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
+    logger.info(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
 
     return cleaned_data
 
