@@ -65,7 +65,7 @@ def remove_duplicates(self, data):
     message = (
         f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.Exclusions:{excluded_data}"
     )
-    logger.info(message)
+    getlogger().debug(message)
 
     return filtered_data
 
@@ -115,7 +115,7 @@ def curate_data(data):
     # handle nulls and data types
     cleaned_data = validate_data(data)
 
-    logger.info(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
+    getlogger().debug(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
 
     return cleaned_data
 
