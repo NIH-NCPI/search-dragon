@@ -12,7 +12,7 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 
 """
 from search_dragon.external_apis import OntologyAPI
-from search_dragon import logger
+from search_dragon import logger as getlogger
 
 class OLSSearchAPICode(OntologyAPI):
     def __init__(self):
@@ -37,6 +37,7 @@ class OLSSearchAPICode(OntologyAPI):
                 - raw_data (list): Results from the requested page.
                 - more_results_available (bool): Whether more results are available.
         """
+        logger = getlogger()
         raw_data = []
         results_per_page = int(results_per_page)
         start_index = int(start_index)
