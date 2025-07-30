@@ -176,9 +176,9 @@ def exec(args=None):
     parser = argparse.ArgumentParser(description="Get metadata for a code using the available locutus OntologyAPI connection.")
     
     parser.add_argument("-ak", "--all_keywords", required=True, help="A string value containing words to search with the API. Delimeter |")
-    parser.add_argument("-o", "--ontologies", required=False, default='HP,HPO', help="A string value containing the ontology_prefixes to use in the searh")
+    parser.add_argument("-o", "--ontologies", required=False, default='HP,HPO,MONDO', help="A string value containing the ontology_prefixes to use in the searh")
     parser.add_argument("-f","--filepath",required=False, default='rich', help="The output filename. Path from root. (Defaults to rich tables in std out")
-    parser.add_argument("-r", "--results_per_page", required=False, default = 1, help="How many pages should the API return per request")
+    parser.add_argument("-r", "--results_per_page", required=False, default=1, help="How many pages should the API return per request")
     parser.add_argument("-s", "--start_index", required=False, default = 1, help="Which page should be returned")
 
     args = parser.parse_args()
