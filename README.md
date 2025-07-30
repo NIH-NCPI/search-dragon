@@ -40,6 +40,22 @@
     pip install --force-reinstall --no-cache-dir git+https://github.com/NIH-NCPI/search-dragon.git
     ```
 
+## Dragon Search
+Based on a CLI tool from DBT Utilities that Brenda has written, *dragon_search* provides the ability to do basic ontology searches using the same backed functionality that Locutus is currently using, though, adjusted for more general use. 
+
+Some example usages: 
+```bash
+$ dragon_search -ak "lung|diabetes|heart"
+```
+
+By default, the results are passed to the terminal via stdin and are displayed as a rich table. 
+
+If you want to write the results to a file, simply pass a filename for the results: 
+```bash
+$ dragon_search -ak "lung|diabetes|heart" -f quick-onto-search.csv
+```
+
+When writing results to a file, logging is written to stdout. When writing to a stdout, logging is written to the file, 'logs/search.log'
 
   ## Notes
   ### API usage

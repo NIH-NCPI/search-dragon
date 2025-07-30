@@ -2,14 +2,14 @@
 Generate the final result response, and any final validation.
 """
 from collections import Counter
-from search_dragon import logger
+from search_dragon import logger as getlogger
 import re
 
 
 def generate_response(
     data, search_url, more_results_available, api_instances
 ):
-    logger.debug(f"Count fetched_data {len(data)}")
+    getlogger().info(f"Count fetched_data {len(data)}")
 
     ontology_counts, results_count = get_code_counts(data)
 
@@ -65,7 +65,7 @@ def remove_duplicates(self, data):
     message = (
         f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.Exclusions:{excluded_data}"
     )
-    logger.debug(message)
+    getlogger().debug(message)
 
     return filtered_data
 
@@ -82,7 +82,7 @@ def validate_data(data):
         "description": [],  # Default to an empty list
         "ontology_prefix": "",
     }
-
+    logger = getlogger()
     validated_data = []
     for item in data:
         validated_item = {}
@@ -115,9 +115,7 @@ def curate_data(data):
     # handle nulls and data types
     cleaned_data = validate_data(data)
 
-    logger.debug(
-        f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}"
-    )
+    getlogger().debug(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
 
     return cleaned_data
 
