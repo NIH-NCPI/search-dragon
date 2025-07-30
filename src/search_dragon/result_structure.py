@@ -9,7 +9,7 @@ import re
 def generate_response(
     data, search_url, more_results_available, api_instances
 ):
-    logger.info(f"Count fetched_data {len(data)}")
+    logger.debug(f"Count fetched_data {len(data)}")
 
     ontology_counts, results_count = get_code_counts(data)
 
@@ -39,7 +39,6 @@ def get_code_counts(data):
     return ontology_counts, results_counts
 
 
-
 def remove_duplicates(self, data):
     """
     Remove duplicate records where the 'uri' field is the same.
@@ -66,7 +65,7 @@ def remove_duplicates(self, data):
     message = (
         f"Records({len(excluded_data)}) were excluded as duplicates based on 'uri'.Exclusions:{excluded_data}"
     )
-    logger.info(message)
+    logger.debug(message)
 
     return filtered_data
 
@@ -116,7 +115,9 @@ def curate_data(data):
     # handle nulls and data types
     cleaned_data = validate_data(data)
 
-    logger.info(f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}")
+    logger.debug(
+        f"Count of records not passing curation/validation: {len(data) - len(cleaned_data)}"
+    )
 
     return cleaned_data
 
