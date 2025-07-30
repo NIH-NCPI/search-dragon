@@ -1,0 +1,2 @@
+api,searched_code,response_code,display,description,system,code_iri,ontology_prefix
+ols,diabetes,HP:0000873,Diabetes insipidus,['A state of excessive water intake and hypotonic (dilute) polyuria. Diabetes insipidus may be due to failure of vasopressin (AVP) release (central or neurogenic diabetes insipidus) or to a failure of the kidney to respond to AVP (nephrogenic diabetes insipidus).'],http://purl.obolibrary.org/obo/hp/hp-international.owl,http://purl.obolibrary.org/obo/HP_0000873,HP
