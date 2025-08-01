@@ -23,11 +23,11 @@ version="v2.0.3"
 # [tool.setuptools_scm]
 # version_file = "src/search-dragon/_version.py"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)
-
-[tool.setuptools.package-data]
-csv_files = ["*.csv"]
 
 [project.scripts]
 dragon_search="search_dragon.search:exec"
