@@ -66,11 +66,11 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
     for api_instance in api_instances:
 
         # Generate the search url
-        search_url = api_instance.build_url(keyword, ontology_list, start_index, results_per_page)
+        search_url = api_instance.build_url(keyword, ontology_list, start_index, results_per_page, input_type)
         logger.debug(f"URL:{search_url}")
 
         # Fetch the data
-        api_results, more_results_available= api_instance.collect_data(search_url, results_per_page, start_index)
+        api_results, more_results_available= api_instance.collect_data(search_url, results_per_page, start_index, input_type)
         logger.debug(f"Count results: {len(api_results)}")
 
         # harmonize the api specific data into standard structure
@@ -93,8 +93,7 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
     return response
 
 
-
-def do_search(codes, ontologies, filepath, results_per_page, start_index):
+def do_search(codes, ontologies, filepath, results_per_page, start_index, input_type):
     logger = getlogger()
     annotations = {}
     onto_data = ftd_ontology_lookup()
@@ -117,15 +116,39 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
             umls_keyword = keyword
 
         try:
-            annotations[keyword]['ols'] = run_search(onto_data, ols_keyword, ontology_param, ['ols'], results_per_page, start_index)
+            annotations[keyword]["ols"] = run_search(
+                onto_data,
+                ols_keyword,
+                ontology_param,
+                ["ols"],
+                results_per_page,
+                start_index,
+                input_type,
+            )
         except:
             pass 
         try:
-            annotations[keyword]['ols2'] = run_search(onto_data, ols_keyword, ontology_param, ['ols2'], results_per_page, start_index)
+            annotations[keyword]["ols2"] = run_search(
+                onto_data,
+                ols_keyword,
+                ontology_param,
+                ["ols2"],
+                results_per_page,
+                start_index,
+                input_type,
+            )
         except:
             pass 
         try:
-            annotations[keyword]['umls'] = run_search(onto_data, umls_keyword, ontology_param, ['umls'], results_per_page, start_index)
+            annotations[keyword]["umls"] = run_search(
+                onto_data,
+                umls_keyword,
+                ontology_param,
+                ["umls"],
+                results_per_page,
+                start_index,
+                input_type,
+            )
         except:
             pass
 
@@ -191,9 +214,11 @@ def exec(args=None):
         # If we want to write the results to a file, we can configure the rich log handler to make the logging much easier to read.
         logger = getlogger("search", loglevel="DEBUG", console_handler=RichHandler(rich_tracebacks=True))
 
-    do_search(codes=args.all_keywords,
-         ontologies=args.ontologies,
-         filepath=args.filepath,
-         results_per_page=args.results_per_page,
-         start_index=args.start_index
-         )
+    do_search(
+        codes=args.all_keywords,
+        ontologies=args.ontologies,
+        filepath=args.filepath,
+        results_per_page=args.results_per_page,
+        start_index=args.start_index,
+        input_typt=args.input_type,
+    )

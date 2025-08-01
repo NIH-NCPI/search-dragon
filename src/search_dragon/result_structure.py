@@ -9,7 +9,8 @@ import re
 def generate_response(
     data, search_url, more_results_available, api_instances
 ):
-    getlogger().info(f"Count fetched_data {len(data)}")
+    logger = getlogger()
+    logger.info(f"Count fetched_data {len(data)}")
 
     ontology_counts, results_count = get_code_counts(data)
 

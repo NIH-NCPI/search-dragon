@@ -23,7 +23,7 @@ class OLSSearchAPICode(OntologyAPI):
         )
         self.total_results_id = 'totalElements'
 
-    def collect_data(self, search_url, results_per_page, start_index):
+    def collect_data(self, search_url, results_per_page, start_index, input_type=None):
         """
         Fetch a single page of data from the provided search endpoint.
 
@@ -66,15 +66,14 @@ class OLSSearchAPICode(OntologyAPI):
             # Check if the start_index exceeds total results
             if start_index >= total_results:
                 message = f"start_index ({start_index}) exceeds total available results ({total_results})."
-                logger.error(message)
-                raise ValueError(message)
+                logger.warning(message)
 
             # Check if more results are available after this request.
             n_results_used = start_index + results_per_page + 1
             more_results_available = n_results_used < total_results
 
         except Exception as e:
-            logger.error(f"Error fetching data from {search_url}: {e}")
+            logger.warning(f"Error fetching data from {search_url}: {e}")
             return [], more_results_available
 
         return raw_data, more_results_available
@@ -133,7 +132,7 @@ class OLSSearchAPICode(OntologyAPI):
         return start_param
 
 
-    def build_url(self, keywords, ontology_list, start_index, results_per_page):
+    def build_url(self, keywords, ontology_list, start_index, results_per_page, input_type=None):
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 

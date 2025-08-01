@@ -21,7 +21,7 @@ class UMLSSearchAPI(OntologyAPI):
         )
         self.total_results_id='recCount'
 
-    def collect_data(self, search_url, results_per_page, start_index):
+    def collect_data(self, search_url, results_per_page, start_index, input_type):
         """
         Fetch a single page of data from the provided search endpoint.
 
@@ -61,15 +61,14 @@ class UMLSSearchAPI(OntologyAPI):
             # Check if the start_index exceeds total results
             if start_index >= total_results:
                 message = f"start_index ({start_index}) exceeds total available results ({total_results})."
-                logger.error(message)
-                raise ValueError(message)
+                logger.warning(message)
 
             # Check if more results are available after this request.
             n_results_used = start_index + results_per_page + 1
             more_results_available = n_results_used < total_results
 
         except Exception as e:
-            logger.error(f"Error fetching data from {search_url}: {e}")
+            logger.warning(f"Error fetching data from {search_url}: {e}")
             return [], more_results_available
 
         return raw_data, more_results_available
@@ -154,7 +153,19 @@ class UMLSSearchAPI(OntologyAPI):
 
         return return_type_param
 
-    def build_url(self, keywords, ontology_list, start_index, results_per_page):
+    def format_optional_params(self, input_type):
+        """
+        Arg required when searching with a code.
+        """
+
+        if input_type == "code":
+            opt_param = f"inputType={input_type}"
+            return opt_param
+        return f"inputType='atom'" # umls option default
+
+    def build_url(
+        self, keywords, ontology_list, start_index, results_per_page, input_type
+    ):
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 
@@ -173,6 +184,7 @@ class UMLSSearchAPI(OntologyAPI):
         start_param = self.format_start_index(start_index)
         page_size_param = self.format_results_per_page(results_per_page)
         return_type_param = self.format_api_specific_params()
+        opt_param = self.format_optional_params(input_type)
 
         key_param = self.format_key()
 
@@ -185,6 +197,7 @@ class UMLSSearchAPI(OntologyAPI):
                     start_param,
                     page_size_param,
                     return_type_param,
+                    opt_param,
                     key_param,
                 ]
             )
