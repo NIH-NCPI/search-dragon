@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"] #, "setuptools-scm"]
+requires = ["setuptools"] 
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -29,6 +29,9 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)
+
+[tool.setuptools.package-data]
+"*" = ["*.csv"]
 
 [project.scripts]
 dragon_search="search_dragon.search:exec"
