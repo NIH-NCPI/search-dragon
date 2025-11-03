@@ -115,6 +115,9 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
         if keyword.startswith('HPO:'):
             ols_keyword = keyword.replace('HPO:', 'HP:')
             umls_keyword = keyword
+        if keyword.startswith('OMIM:'):
+            ols_keyword = keyword
+            umls_keyword = keyword.replace('OMIM:', '')
 
         try:
             annotations[keyword]['ols'] = run_search(onto_data, ols_keyword, ontology_param, ['ols'], results_per_page, start_index)
