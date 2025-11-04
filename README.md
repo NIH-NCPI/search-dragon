@@ -1,10 +1,10 @@
 # search-dragon
 
-**`search-dragon`** Unified API Interface for ontology search APIs to be used by the locutus application.
+**`search-dragon`** Unified API Interface for ontology search APIs, OLS and UMLS.
 
 
 ## Running the script locally or working on a branch?
-1. **Create and activate a virtual environment** (recommended):
+1. **Create and/or activate a virtual environment** (recommended):
 
 [[Click here]](https://realpython.com/python-virtual-environments-a-primer/) for more on virtual environments.
 
@@ -23,21 +23,25 @@
     ```
 2. **Install the package** <br>
     If working on a new feature it is possible to install a package version within
-    the remote or local branch
-    **NOTE** If testing changes to search-dragon in `locutus` don't forget to deploy a `locutus` branch with the correct `search-dragon` version in the requirements.txt file! 
-    **NOTE** Any new env variables created, e.g. api keys, will need to be added to the `locutus` deployment files.
-      ```
-    # remote
-    pip install git+https://github.com/NIH-NCPI/search-dragon.git@{branch_name}
+    the remote or local branch <br>
+    
+    - **Locutus Users** <br>
+    1. If testing changes to search-dragon in `locutus` don't forget to deploy a `locutus` branch with the correct `search-dragon` version in the toml file! <br>
+    2. Any new env variables created, e.g. api keys, will need to be added to the `locutus` deployment files.
 
-    # local
-    pip install -e .
-
-    # Locutus should install using the following command.
+    Installation methods:
+      ```bash
+    Search-dragon should installed using the following command.
     pip install git+https://github.com/NIH-NCPI/search-dragon.git
 
-    # A re-install might be required while testing any changes to this repo, use this command to force the reinstall and ensure the latest version.
+    # This install command will ensure the proper version installed. Useful for troubleshooting purposes.
     pip install --force-reinstall --no-cache-dir git+https://github.com/NIH-NCPI/search-dragon.git
+
+    # Installing a specific branch of search-dragon.
+    pip install git+https://github.com/NIH-NCPI/search-dragon.git@{branch_name}
+
+    # Use this method for local development. In the root dir of the cloned repo run this command to enact local changes. 
+    pip install -e .
     ```
 
 ## Dragon Search
@@ -45,7 +49,7 @@ Based on a CLI tool from DBT Utilities that Brenda has written, *dragon_search* 
 
 Some example usages: 
 ```bash
-$ dragon_search -ak "lung|diabetes|heart"
+$ dragon_search -ak "lung|diabetes|heart" -o "HP,HPO,MONDO"
 ```
 
 By default, the results are passed to the terminal via stdin and are displayed as a rich table. 

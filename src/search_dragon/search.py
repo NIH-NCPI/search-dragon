@@ -45,7 +45,6 @@ def get_api_instance(search_api_list):
     return api_instances
 
 
-
 def run_search(ontology_data, keyword, ontology_list, search_api_list, results_per_page, start_index):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
@@ -70,6 +69,7 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
         logger.debug(f"URL:{search_url}")
 
         # Fetch the data
+
         api_results, more_results_available= api_instance.collect_data(search_url, results_per_page, start_index)
         logger.debug(f"Count results: {len(api_results)}")
 
@@ -79,7 +79,7 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
 
         # Apply speciallized cleaning prior to combining data.
         cleaned_harmonized_data = api_instance.clean_harmonized_data(harmonized_data)
-        
+
         # Combine the ontology api data
         combined_data.extend(cleaned_harmonized_data)
 
@@ -91,7 +91,6 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
     logger.debug(f"keyword: {keyword}")
 
     return response
-
 
 
 def do_search(codes, ontologies, filepath, results_per_page, start_index):
@@ -115,9 +114,9 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
         if keyword.startswith('HPO:'):
             ols_keyword = keyword.replace('HPO:', 'HP:')
             umls_keyword = keyword
-        if keyword.startswith('OMIM:'):
+        if keyword.startswith("OMIM:"):
             ols_keyword = keyword
-            umls_keyword = keyword.replace('OMIM:', '')
+            umls_keyword = keyword.replace("OMIM:", "")
 
         try:
             annotations[keyword]['ols'] = run_search(onto_data, ols_keyword, ontology_param, ['ols'], results_per_page, start_index)

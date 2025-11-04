@@ -12,6 +12,7 @@ from search_dragon.external_apis import OntologyAPI
 from search_dragon.result_structure import clean_url
 from search_dragon import logger as getlogger
 import os
+from search_dragon.result_structure import clean_url
 
 class UMLSSearchAPI(OntologyAPI):
     def __init__(self):

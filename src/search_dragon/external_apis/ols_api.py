@@ -9,6 +9,7 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 """
 from search_dragon.external_apis import OntologyAPI
 from search_dragon import logger as getlogger
+from search_dragon.result_structure import clean_url
 
 class OLSSearchAPI(OntologyAPI):
     def __init__(self):
@@ -69,7 +70,7 @@ class OLSSearchAPI(OntologyAPI):
             more_results_available = n_results_used < total_results
 
         except Exception as e:
-            logger.error(f"Error fetching data from {search_url}: {e}")
+            logger.error(f"Error fetching data from {clean_url(search_url)}: {e}")
             return [], more_results_available
 
         return raw_data, more_results_available
