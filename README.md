@@ -56,7 +56,7 @@ By default, the results are passed to the terminal via stdin and are displayed a
 
 If you want to write the results to a file, simply pass a filename for the results: 
 ```bash
-$ dragon_search -ak "lung|diabetes|heart" -f quick-onto-search.csv
+$ dragon_search -ak "HP:0000873|OMIM:616421" -f quick-onto-search.csv
 ```
 
 When writing results to a file, logging is written to stdout. When writing to a stdout, logging is written to the file, 'logs/search.log'

@@ -7,7 +7,7 @@ from search_dragon.external_apis import OntologyAPI
 from search_dragon.external_apis.ols_code_api import OLSSearchAPICode
 from search_dragon.external_apis.ols_api import OLSSearchAPI
 from search_dragon.external_apis.umls_api import UMLSSearchAPI
-from search_dragon.result_structure import generate_response
+from search_dragon.result_structure import generate_response, clean_url
 from search_dragon.support import ftd_ontology_lookup
 from pathlib import Path
 import argparse
@@ -66,7 +66,7 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
 
         # Generate the search url
         search_url = api_instance.build_url(keyword, ontology_list, start_index, results_per_page)
-        logger.debug(f"URL:{search_url}")
+        logger.debug(f"URL:{clean_url(search_url)}")
 
         # Fetch the data
 
