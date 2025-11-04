@@ -45,6 +45,7 @@ def get_api_instance(search_api_list):
     return api_instances
 
 
+
 def run_search(ontology_data, keyword, ontology_list, search_api_list, results_per_page, start_index):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
@@ -69,7 +70,6 @@ def run_search(ontology_data, keyword, ontology_list, search_api_list, results_p
         logger.debug(f"URL:{clean_url(search_url)}")
 
         # Fetch the data
-
         api_results, more_results_available= api_instance.collect_data(search_url, results_per_page, start_index)
         logger.debug(f"Count results: {len(api_results)}")
 
