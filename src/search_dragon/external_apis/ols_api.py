@@ -59,7 +59,7 @@ class OLSSearchAPI(OntologyAPI):
             logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
 
             # Check if the start_index exceeds total results
-            if start_index >= total_results:
+            if start_index > total_results:
                 message = f"start_index ({start_index}) exceeds total available results ({total_results})."
                 logger.error(message)
                 raise ValueError(message)
