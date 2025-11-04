@@ -10,9 +10,8 @@ This script defines the `UMLSSearchAPI` class that interacts with the umls API t
 
 from search_dragon.external_apis import OntologyAPI
 from search_dragon.result_structure import clean_url
-from search_dragon import logger
+from search_dragon import logger as getlogger
 import os
-from search_dragon.result_structure import clean_url
 
 class UMLSSearchAPI(OntologyAPI):
     def __init__(self):
@@ -116,7 +115,7 @@ class UMLSSearchAPI(OntologyAPI):
     def get_api_key(self):
         API_KEY = os.getenv("UMLS_API_KEY")
         if not API_KEY:
-            logger.warning(f"FAIL request - API_KEY for 'umls' is not set in the environment variables.")
+            getlogger.warning(f"FAIL request - API_KEY for 'umls' is not set in the environment variables.")
         else:
             return API_KEY
         
