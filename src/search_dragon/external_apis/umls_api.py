@@ -9,6 +9,7 @@ This script defines the `UMLSSearchAPI` class that interacts with the umls API t
 """
 
 from search_dragon.external_apis import OntologyAPI
+from search_dragon.result_structure import clean_url
 from search_dragon import logger as getlogger
 import os
 
@@ -21,7 +22,7 @@ class UMLSSearchAPI(OntologyAPI):
         )
         self.total_results_id='recCount'
 
-    def collect_data(self, search_url, results_per_page, start_index):
+    def collect_data(self, paginated_url, results_per_page, start_index):
         """
         Fetch a single page of data from the provided search endpoint.
 
@@ -43,8 +44,7 @@ class UMLSSearchAPI(OntologyAPI):
 
         try:
             # Construct the paginated URL
-            paginated_url = f"{search_url}"
-            logger.debug(f"Fetching data from {paginated_url}")
+            logger.debug(f"Fetching data from {clean_url(paginated_url)}")
 
             # Fetch data
             data = self.fetch_data(paginated_url)
@@ -69,7 +69,7 @@ class UMLSSearchAPI(OntologyAPI):
             more_results_available = n_results_used < total_results
 
         except Exception as e:
-            logger.error(f"Error fetching data from {search_url}: {e}")
+            logger.error(f"Error fetching data from {clean_url(paginated_url)}: {e}")
             return [], more_results_available
 
         return raw_data, more_results_available
@@ -115,9 +115,7 @@ class UMLSSearchAPI(OntologyAPI):
     def get_api_key(self):
         API_KEY = os.getenv("UMLS_API_KEY")
         if not API_KEY:
-            raise ValueError(
-                f"API_KEY for 'umls' is not set in the environment variables."
-            )
+            getlogger.warning(f"FAIL request - API_KEY for 'umls' is not set in the environment variables.")
         else:
             return API_KEY
         
