@@ -8,19 +8,21 @@ This script defines the `UMLSSearchAPI` class that interacts with the umls API t
 
 """
 
+import os
+
+from search_dragon import logger as getlogger
 from search_dragon.external_apis import OntologyAPI
 from search_dragon.result_structure import clean_url
-from search_dragon import logger as getlogger
-import os
+
 
 class UMLSSearchAPI(OntologyAPI):
     def __init__(self):
         super().__init__(
             base_url="https://uts-ws.nlm.nih.gov/rest/search/current",
-            api_id= "umls",
+            api_id="umls",
             api_name="Unified Medical Language System",
         )
-        self.total_results_id='recCount'
+        self.total_results_id = "recCount"
 
     def collect_data(self, paginated_url, results_per_page, start_index):
         """
@@ -53,10 +55,12 @@ class UMLSSearchAPI(OntologyAPI):
             # Extract results
             results = data.get("result", {}).get("results", [])
             raw_data.extend(results)
-            
+
             total_results = data.get("result", {}).get(self.total_results_id, 0)
             logger.debug(f"Total results found: {total_results}")
-            logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
+            logger.debug(
+                f"Retrieved {len(results)} results (start_index: {start_index})."
+            )
 
             # Check if the start_index exceeds total results
             if start_index > total_results:
@@ -111,14 +115,16 @@ class UMLSSearchAPI(OntologyAPI):
         ontology_param = f"sabs={formatted_ontologies}"
 
         return ontology_param
-    
+
     def get_api_key(self):
         API_KEY = os.getenv("UMLS_API_KEY")
         if not API_KEY:
-            getlogger.warning(f"FAIL request - API_KEY for 'umls' is not set in the environment variables.")
-        else:
-            return API_KEY
-        
+            getlogger.error(
+                f"FAIL request - API_KEY for 'umls' is not set in the environment variables."
+            )
+            raise ValueError(f"API key currently unavailable for querying UMLS.")
+        return API_KEY
+
     def format_key(self):
         """
         Formats the api key into a format readable by the api.
@@ -206,10 +212,14 @@ class UMLSSearchAPI(OntologyAPI):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
         # Get the ontology prefix from the raw result
-        ontology_prefix = raw_results.get("rootSource") or "ERR:CURIE" # ERRs are caught by validate_data and not returned
+        ontology_prefix = (
+            raw_results.get("rootSource") or "ERR:CURIE"
+        )  # ERRs are caught by validate_data and not returned
 
         # Retrieve the corresponding value from ontology_list
-        system = ontology_data.get(ontology_prefix) or "ERR:SYSTEM" # ERRs are caught by validate_data and not returned
+        system = (
+            ontology_data.get(ontology_prefix) or "ERR:SYSTEM"
+        )  # ERRs are caught by validate_data and not returned
 
         harmonized_data = {
             "code": raw_results.get(
