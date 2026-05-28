@@ -1,0 +1,205 @@
+# ============================================================
+# Design Document Template
+# claude.ai | AI-Assisted Design Document
+# ============================================================
+
+metadata:
+  title: "Search Dragon - Descendants"
+  version: "0.1.0"
+  status: draft # draft | review | approved
+  created: "2026-05-28"
+  updated: "2026-05-28"
+  author: "Eric Torstenson"
+  reviewers: []
+
+# ============================================================
+# 1. OVERVIEW
+# ============================================================
+overview:
+  summary: >
+    Add new search capability to search dragon to enable pulling down all
+    descendants for a given term from within a hierarchical ontology.
+  goals:
+    - "Add new search to application for pulling descendants for a given term"
+    - "Add support to OLS and possibly UMLS depending on time"
+  non_goals:
+    - This will only return codes and displays and will not expand linkml enums
+
+# ============================================================
+# 2. CONTEXT & MOTIVATION
+# ============================================================
+context:
+  background: >
+    Oaklib's vskit is failing on certain ontologies, which OLS supports. We
+    be moving toward writing our own expansion code that relies on OLS APIs.
+  motivation: >
+    There is uncertainty whether the issues we encountered with using vskit
+    could be overcome without a lot of work. OLS has been proven to return
+    the correct codes for some of the required expansions. Without this, there
+    is a real risk that the enumeration expansion will not be able to move
+    forward without a significant amount of effort.
+  references:
+    - label: "OLS Descendants Discovery work"
+      url: "https://docs.google.com/document/d/1bATkZ4Sh-BhR3LXxIrfYJEo2vmvMCn1zIzSQsShJvjU/edit?usp=sharing"
+    - label: "Implementation Details"
+      url: design/descendants-details
+
+# ============================================================
+# 3. SCOPE
+# ============================================================
+scope:
+  in_scope:
+    - "Add new command line argument to the search dragon app to support the new query"
+    - "Add new application function to properly dispatch the api execution"
+    - "Add functionality to each of the relevant API search models to perform the new search"
+  out_of_scope:
+    - "This only involves code responses, not expansion of enumerations"
+  constraints:
+    - "Prioritize OLS functionality"
+  assumptions:
+    - "We are expecting that our expansions can always be handled by OLS or UMLS"
+
+# ============================================================
+# 4. STAKEHOLDERS
+# ============================================================
+stakeholders:
+  - role: Developer
+    name: "Yelena Cox"
+    responsibilities:
+      - "Add new functionality to the search dragon application"
+
+# ============================================================
+# 5. TECHNICAL DESIGN
+# ============================================================
+technical_design:
+  architecture:
+    description: >
+      Add functionality to the search dragon application to enable searches
+      that return all descendant codes for a given ontological term from a
+      hierarchical ontology using the search APIs currently supported by
+      the application.
+    components:
+      - name: "Search Dragon"
+        description: "This is the tool/library used by MapDragon to search the different APIs for terms."
+        technology: "Python"
+
+  data_model:
+    description: >
+      The responses should be in the same format as current searches
+    entities:
+      - name: "code"
+        description: "code as is returned from the API"
+      - name: "system"
+        description: "'Cleaned' MapDragon compliant FHIR systems"
+      - name: "code_iri"
+        description: "IRI as found in response"
+      - name: "display"
+        description: "Code's human friendly 'label'"
+      - name: "description"
+        description: "More detailed description of the code, if one is returned"
+      - name: "ontology_prefix"
+        description: "Prefix provided by the API"
+
+  interfaces:
+    inputs:
+      - name: "Search API"
+        format: "either OLS, UMLS, ALL"
+        description: "This will indicate which API the user wishes to query. Users may ask for the search to iterate over all possible searches until a successful response is found."
+      - name: "Ontology (Curie)"
+        format: "string"
+        description: "one of the accepted Curies, such as HP, OMIM, etc. For some, there may be different requirements for each of the two ontologies, ie HP vs HPO for OLS or UMLS, respectively."
+      - name: "Parent Code"
+        format: "string"
+        description: "Code for whom the descendants are requested."
+
+    outputs:
+      - name: "Descendants"
+        format: "CSV File"
+        description: >
+          for the first pass, we'll just use a CSV format that is very similar to
+          the [standard search_dragon CLI return](https://github.com/NIH-NCPI/search-dragon/blob/main/src/search_dragon/search.py#L142)
+          except possibly column names that are more appropriate for this particular type of search.
+
+# ============================================================
+# 6. IMPLEMENTATION APPROACH
+# ============================================================
+implementation:
+  strategy: >
+    This will simply leverage the existing search APIs using different
+    queries to perform the extraction of descendant codes.
+  phases:
+    - phase: 1
+      name: "Initial Run"
+      description: >
+        This should, at the very least, provide basic support for the same
+        types of output as is already supported by search dragon, but for
+        descendants instead of basic matches.
+  error_handling: >
+    Errors should be reported as exceptions which yield descriptive details
+    to the stderr.
+  logging: >
+    - DEBUG:  We should be able to trace every key step at the debug level
+    - INFO: Basic messages relating to successful queries
+    - WARN: Problems that aren't necessarily errors, such as a search failing
+      on the first ontology, but was found in the second
+    - ERROR: Errors encountered
+
+# ============================================================
+# 7. TESTING STRATEGY
+# ============================================================
+testing:
+  approach: >
+    [Unit, integration, manual — describe the strategy.]
+  test_cases:
+    - id: TC-001
+      description: "[What is being tested]"
+      expected_result: "[What success looks like]"
+  acceptance_criteria:
+    - "[Criterion that must be true before this is considered done]"
+
+# ============================================================
+# 8. RISKS & MITIGATIONS
+# ============================================================
+risks:
+  - id: R-001
+    description: "As with all SearchDragon runs, this is entirely dependendent on the APIs and will not work if those change or are down. "
+    likelihood: low # low | medium | high
+    impact: medium # low | medium | high
+    mitigation: "Changes to the APIs themselves may be mitagated by fixes to the application's code."
+
+# ============================================================
+# 9. OPEN QUESTIONS
+# ============================================================
+open_questions:
+  - id: Q-001
+    question: "Can UMLS provide similar responses to OLS?"
+    owner: "Yelena will perform similar discovery work for UMLS if time permits."
+    due: "2026-06-15"
+
+# ============================================================
+# 10. DECISION LOG
+# ============================================================
+decision_log:
+  - id: D-001
+    date: "2026-05-28"
+    decision: "We decided to only support relationship types of type SubclassOf for now"
+    rationale: "Any other type would be a totally different endpoint and will require similar amounts of work to support."
+    alternatives_considered:
+      - "Investigate other possibilities, such as ancestors, etc."
+  - id: D-002
+    date: "2026-05-28"
+    decision: "CSV Export"
+    rationale: "To remain consistent with the other search dragon functionality"
+    alternatives_considered:
+      - "There was consideration of returning objects. Ultimately, it may be worth refactoring the app to return objects and let the application itself decide the final format"
+
+# ============================================================
+# 11. APPENDIX
+# ============================================================
+appendix:
+  glossary:
+    - term: "[Term]"
+      definition: "[Definition]"
+  diagrams: []
+  notes: >
+    [Any additional free-form notes.]
