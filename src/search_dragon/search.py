@@ -256,7 +256,7 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
 
 
 def desc_search(codes, ontologies, filepath, results_per_page, start_index, iri):
-    codes = codes or [iri.split("/")[-1]]
+    codes = codes or [iri.split("/")[-1].replace("_",":")]
     logger = getlogger()
     annotations = {}
     onto_data = ftd_ontology_lookup()

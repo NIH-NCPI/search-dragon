@@ -12,8 +12,6 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 
 """
 
-import json
-
 from search_dragon import logger as getlogger
 from search_dragon.external_apis import OntologyAPI
 from search_dragon.result_structure import clean_url
