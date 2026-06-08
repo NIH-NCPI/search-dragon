@@ -10,7 +10,6 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         self.api_name = "Ontology Lookup Service"
         self.total_results_id = "totalElements"
 
-
     def collect_data(self, search_url, results_per_page, start_index):
         # results_per_page and start_index are not used in this class, but kept since they are used in other classes
         """
@@ -38,7 +37,9 @@ class OLSDescendantsAPI(OLSSearchAPICode):
                 page_obj = data.get("page", {})
                 total_pages = page_obj.get("totalPages", 1)
                 total_elements = page_obj.get("totalElements", 0)
-                logger.debug(f"Page {current_page + 1} of {total_pages}. Total elements: {total_elements}")
+                logger.debug(
+                    f"Page {current_page + 1} of {total_pages}. Total elements: {total_elements}"
+                )
 
                 current_page += 1
                 if current_page >= total_pages:
@@ -49,8 +50,6 @@ class OLSDescendantsAPI(OLSSearchAPICode):
             return [], False
 
         return raw_data, False
-
-
 
     def format_iri(self, iri):
         """

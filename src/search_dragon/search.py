@@ -77,6 +77,7 @@ def run_search(
     Returns:
     dict: The final structured response containing harmonized and curated search results.
     """
+
     logger = getlogger()
     api_instances = get_api_instance(search_api_list)
 
@@ -141,6 +142,9 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
         if keyword.startswith("OMIM:"):
             ols_keyword = keyword
             umls_keyword = keyword.replace("OMIM:", "")
+        if keyword.startswith("SNOMEDCT:"):
+            ols_keyword = keyword.replace("SNOMEDCT:", "SNOMED:")
+            umls_keyword = keyword
 
         try:
             annotations[keyword]["ols"] = run_search(
@@ -151,7 +155,7 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
                 results_per_page,
                 start_index,
             )
-        except:
+        except Exception as e:
             pass
         try:
             annotations[keyword]["ols2"] = run_search(
@@ -277,6 +281,9 @@ def desc_search(codes, ontologies, filepath, results_per_page, start_index, iri)
         if parent_code.startswith("OMIM:"):
             ols_keyword = parent_code
             umls_keyword = parent_code.replace("OMIM:", "")
+        if parent_code.startswith("SNOMEDCT:"):
+            ols_keyword = parent_code.replace("SNOMEDCT:", "SNOMED:")
+            umls_keyword = parent_code
 
         try:
             annotations[parent_code]["olsd"] = run_search(
@@ -439,8 +446,12 @@ def exec(args=None):
         )
 
     onto_data = ftd_ontology_lookup()
+    if args.all_keywords:
+        args.all_keywords = args.all_keywords.lower().replace("snomedct", "snomed")
+    if args.ontologies:
+        args.ontologies = args.ontologies.lower().replace("snomedct", "snomed")
     if args.descendants:
-        iri_result = run_search(
+        search_results = run_search(
             onto_data,
             args.all_keywords,
             [args.ontologies],
@@ -448,11 +459,12 @@ def exec(args=None):
             args.results_per_page,
             args.start_index,
         )
-        results = iri_result.get("results", [])
-        if not results:
+        iri_results = search_results.get("results", [])
+
+        if not iri_results:
             print(f"Could not find IRI for {args.all_keywords}")
             return
-        iri = results[0].get("code_iri")
+        iri = iri_results[0].get("code_iri")
         desc_search(
             codes=args.all_keywords,
             ontologies=args.ontologies,
