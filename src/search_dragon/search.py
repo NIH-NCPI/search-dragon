@@ -246,7 +246,7 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
                         ]
                     )
                 else:
-                    table.add_row([keyword, "No results", "No Results", ""])
+                    table.add_row(keyword, "No results", "No Results", "")
 
     if filepath != "rich":
         fileobj.close()
@@ -256,7 +256,7 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
 
 
 def desc_search(codes, ontologies, filepath, results_per_page, start_index, iri):
-    codes = codes or [iri.split("/")[-1].replace("_",":")]
+    codes = [codes] if codes else [iri.split("/")[-1].replace("_", ":")]
     logger = getlogger()
     annotations = {}
     onto_data = ftd_ontology_lookup()
@@ -420,6 +420,7 @@ def exec(args=None):
         "-i",
         "--iri",
         required=False,
+        type=str,
         help="The iri for the parent code to pull descendants.",
     )
 
@@ -437,14 +438,28 @@ def exec(args=None):
             console_handler=RichHandler(rich_tracebacks=True),
         )
 
+    onto_data = ftd_ontology_lookup()
     if args.descendants:
+        iri_result = run_search(
+            onto_data,
+            args.all_keywords,
+            [args.ontologies],
+            ["ols2"],
+            args.results_per_page,
+            args.start_index,
+        )
+        results = iri_result.get("results", [])
+        if not results:
+            print(f"Could not find IRI for {args.all_keywords}")
+            return
+        iri = results[0].get("code_iri")
         desc_search(
             codes=args.all_keywords,
             ontologies=args.ontologies,
             filepath=args.filepath,
             results_per_page=args.results_per_page,
             start_index=args.start_index,
-            iri=args.iri,
+            iri=iri,
         )
     else:
         do_search(
