@@ -427,6 +427,7 @@ def exec(args=None):
         "-i",
         "--iri",
         required=False,
+        default=None,
         type=str,
         help="The iri for the parent code to pull descendants.",
     )
@@ -451,20 +452,22 @@ def exec(args=None):
     if args.ontologies:
         args.ontologies = args.ontologies.lower().replace("snomedct", "snomed")
     if args.descendants:
-        search_results = run_search(
-            onto_data,
-            args.all_keywords,
-            [args.ontologies],
-            ["ols2"],
-            args.results_per_page,
-            args.start_index,
-        )
-        iri_results = search_results.get("results", [])
-
-        if not iri_results:
-            print(f"Could not find IRI for {args.all_keywords}")
-            return
-        iri = iri_results[0].get("code_iri")
+        if args.iri:
+            iri = args.iri
+        else:
+            search_results = run_search(
+                onto_data,
+                args.all_keywords,
+                [args.ontologies],
+                ["ols2"],
+                args.results_per_page,
+                args.start_index,
+            )
+            iri_results = search_results.get("results", [])
+            iri = iri_results[0].get("code_iri")
+            if not iri_results:
+                print(f"Could not find IRI for {args.all_keywords}")
+                return
         desc_search(
             codes=args.all_keywords,
             ontologies=args.ontologies,
