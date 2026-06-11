@@ -59,7 +59,7 @@ If you want to write the results to a file, simply pass a filename for the resul
 $ dragon_search -ak "HP:0000873|OMIM:616421" -f quick-onto-search.csv
 ```
 
-If you want to get the descendants for a code, provide the descendants flag along with the ontology.
+If you want to get the descendants for a code, provide the descendants flag along with the ontology. Only OLS API is supported currently.
 ```bash
 $ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -d
 ```
