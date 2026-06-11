@@ -392,7 +392,7 @@ def exec(args=None):
         "-o",
         "--ontologies",
         required=False,
-        default="HP,HPO,MONDO",
+        default=None,
         help="A string value containing the ontology_prefixes to use in the searh",
     )
     parser.add_argument(
@@ -451,7 +451,10 @@ def exec(args=None):
         args.all_keywords = args.all_keywords.lower().replace("snomedct", "snomed")
     if args.ontologies:
         args.ontologies = args.ontologies.lower().replace("snomedct", "snomed")
+    if args.descendants and not args.ontologies:
+        parser.error("-o/--ontologies is required when -d/--descendants is provided")
     if args.descendants:
+        args.start_index = 0
         if args.iri:
             iri = args.iri
         else:
@@ -479,7 +482,7 @@ def exec(args=None):
     else:
         do_search(
             codes=args.all_keywords,
-            ontologies=args.ontologies,
+            ontologies=args.ontologies or "HP,HPO,MONDO",
             filepath=args.filepath,
             results_per_page=args.results_per_page,
             start_index=args.start_index,

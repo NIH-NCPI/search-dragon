@@ -59,6 +59,11 @@ If you want to write the results to a file, simply pass a filename for the resul
 $ dragon_search -ak "HP:0000873|OMIM:616421" -f quick-onto-search.csv
 ```
 
+If you want to get the descendants for a code, provide the descendants flag along with the ontology.
+```bash
+$ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -d
+```
+
 When writing results to a file, logging is written to stdout. When writing to a stdout, logging is written to the file, 'logs/search.log'
 
   ## Notes

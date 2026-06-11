@@ -1,3 +1,5 @@
+import urllib.parse
+
 from search_dragon import logger as getlogger
 from search_dragon.external_apis.ols_code_api import OLSSearchAPICode
 
@@ -62,10 +64,12 @@ class OLSDescendantsAPI(OLSSearchAPICode):
             The formatted iri parameter to be inserted into the search url.
 
         """
-        iri = iri.replace(":", "%253A")
-        iri = iri.replace("/", "%252F")
+        # Safe, robust double-encoding
+        double_encoded_iri = urllib.parse.quote(
+            urllib.parse.quote(iri, safe=""), safe=""
+        )
 
-        return iri
+        return double_encoded_iri
 
     def build_url(
         self, keywords, ontology_list, start_index, results_per_page, iri=None
@@ -116,11 +120,9 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         if isinstance(raw_results, list):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
-        # import pdb
-        # pdb.set_trace()
         # Get the ontology prefix from the raw result
-        ontology_prefix = (
-            raw_results.get("ontology_prefix") or "ERR:CURIE"
+        ontology_prefix = raw_results.get(
+            "ontology_prefix", "ERR:CURIE"
         )  # ERRs are caught by validate_data and not returned
 
         # Retrieve the corresponding value from ontology_list
