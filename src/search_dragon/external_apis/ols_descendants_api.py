@@ -1,5 +1,7 @@
 import urllib.parse
 
+import rich
+
 from search_dragon import logger as getlogger
 from search_dragon.external_apis.ols_code_api import OLSSearchAPICode
 
@@ -74,6 +76,7 @@ class OLSDescendantsAPI(OLSSearchAPICode):
     def build_url(
         self, keywords, ontology_list, start_index, results_per_page, iri=None
     ):
+        # TODO: add direct only args above. If direct only arg is there, do conditional below to use the children query instead (look into this to make sure that's correct)
         # results_per_page and start_index are not used in this class, but kept since they are used in other classes
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
@@ -131,6 +134,7 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         )  # ERRs are caught by validate_data and not returned
 
         display = raw_results.get("label")
+        # TODO: join description array with return character \n
 
         harmonized_data = {
             "code": raw_results.get("obo_id"),

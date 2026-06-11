@@ -259,12 +259,13 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
         console.print(table)
 
 
-def desc_search(codes, ontologies, filepath, results_per_page, start_index, iri):
+def desc_search(
+    codes, ontologies, filepath, results_per_page, start_index, iri, parent_data
+):
     codes = [codes] if codes else [iri.split("/")[-1].replace("_", ":")]
     logger = getlogger()
     annotations = {}
     onto_data = ftd_ontology_lookup()
-
     for parent_code in codes:
         annotations[parent_code] = {}
 
@@ -318,6 +319,20 @@ def desc_search(codes, ontologies, filepath, results_per_page, start_index, iri)
                 "ontology_prefix",
             ]
         )
+
+        if parent_data:
+            writer.writerow(
+                [
+                    "ols2",
+                    "",
+                    parent_data.get("code"),
+                    parent_data.get("display", ""),
+                    parent_data.get("description", ""),
+                    parent_data.get("system", ""),
+                    parent_data.get("code_iri", ""),
+                    parent_data.get("ontology_prefix", ""),
+                ]
+            )
     else:
         table = Table(
             title="Search Results", expand=True, row_styles=["yellow", "green"]
@@ -431,6 +446,14 @@ def exec(args=None):
         type=str,
         help="The iri for the parent code to pull descendants.",
     )
+    parser.add_argument(
+        "-p",
+        "--parent_data",
+        required=False,
+        action="store_true",
+        default=None,
+        help="Include details of the parent node.",
+    )
 
     args = parser.parse_args()
 
@@ -455,9 +478,9 @@ def exec(args=None):
         parser.error("-o/--ontologies is required when -d/--descendants is provided")
     if args.descendants:
         args.start_index = 0
-        if args.iri:
-            iri = args.iri
-        else:
+        iri_results = []
+
+        if not args.iri or args.parent_data:
             search_results = run_search(
                 onto_data,
                 args.all_keywords,
@@ -467,10 +490,21 @@ def exec(args=None):
                 args.start_index,
             )
             iri_results = search_results.get("results", [])
-            iri = iri_results[0].get("code_iri")
-            if not iri_results:
-                print(f"Could not find IRI for {args.all_keywords}")
+        if args.iri:
+            iri = args.iri
+        else:
+            if not iri_results or len(iri_results) == 0:
+                print(
+                    f"Could not find IRI for {args.all_keywords}. Please try again in a few minutes to ensure this is not an issue with the API."
+                )
                 return
+            iri = iri_results[0].get("code_iri")
+
+        if args.parent_data and iri_results:
+            parent_data = iri_results[0]
+        else:
+            parent_data = None
+
         desc_search(
             codes=args.all_keywords,
             ontologies=args.ontologies,
@@ -478,6 +512,8 @@ def exec(args=None):
             results_per_page=args.results_per_page,
             start_index=args.start_index,
             iri=iri,
+            parent_data=parent_data,
+            # direct_desc = args.direct_only
         )
     else:
         do_search(
