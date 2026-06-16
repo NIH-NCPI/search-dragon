@@ -64,6 +64,7 @@ def run_search(
     results_per_page,
     start_index,
     iri=None,
+    descendants=False,
 ):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
@@ -110,7 +111,7 @@ def run_search(
 
     # Final cleaning and structuring of the combined data
     response = generate_response(
-        combined_data, search_url, more_results_available, api_instances
+        combined_data, search_url, more_results_available, api_instances, descendants
     )
 
     logger.debug(f"keyword: {keyword}")
@@ -295,6 +296,7 @@ def desc_search(
                 results_per_page,
                 start_index,
                 iri,
+                descendants=True,
             )
         except:
             pass
@@ -321,13 +323,16 @@ def desc_search(
         )
 
         if parent_data:
+            description = parent_data.get("description", "")
+            if isinstance(description, list):
+                description = "\n".join(description)
             writer.writerow(
                 [
                     "ols2",
                     "",
                     parent_data.get("code"),
                     parent_data.get("display", ""),
-                    parent_data.get("description", ""),
+                    description,
                     parent_data.get("system", ""),
                     parent_data.get("code_iri", ""),
                     parent_data.get("ontology_prefix", ""),
