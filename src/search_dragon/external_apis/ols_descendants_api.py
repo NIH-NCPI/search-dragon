@@ -133,12 +133,15 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         )  # ERRs are caught by validate_data and not returned
 
         display = raw_results.get("label")
+        description = raw_results.get("description")
+        if isinstance(description, list):
+            description = "\n".join(description)
         harmonized_data = {
             "code": raw_results.get("obo_id"),
             "system": system,
             "code_iri": raw_results.get("iri"),
             "display": display,
-            "description": display,
+            "description": description,
             "ontology_prefix": ontology_prefix.upper(),
         }
 
