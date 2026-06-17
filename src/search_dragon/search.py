@@ -65,6 +65,7 @@ def run_search(
     start_index,
     iri=None,
     descendants=False,
+    children=False,
 ):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
@@ -86,7 +87,12 @@ def run_search(
     for api_instance in api_instances:
         # Generate the search url
         search_url = api_instance.build_url(
-            keyword, ontology_list, start_index, results_per_page, iri
+            keyword,
+            ontology_list,
+            start_index,
+            results_per_page,
+            iri,
+            children=children,
         )
         logger.debug(f"URL:{clean_url(search_url)}")
 
@@ -156,7 +162,7 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
                 results_per_page,
                 start_index,
             )
-        except Exception as e:
+        except:
             pass
         try:
             annotations[keyword]["ols2"] = run_search(
@@ -261,7 +267,14 @@ def do_search(codes, ontologies, filepath, results_per_page, start_index):
 
 
 def desc_search(
-    codes, ontologies, filepath, results_per_page, start_index, iri, parent_data
+    codes,
+    ontologies,
+    filepath,
+    results_per_page,
+    start_index,
+    iri,
+    parent_data,
+    children,
 ):
     codes = [codes] if codes else [iri.split("/")[-1].replace("_", ":")]
     logger = getlogger()
@@ -297,6 +310,7 @@ def desc_search(
                 start_index,
                 iri,
                 descendants=True,
+                children=children,
             )
         except:
             pass
@@ -449,7 +463,7 @@ def exec(args=None):
         required=False,
         default=None,
         type=str,
-        help="The iri for the parent code to pull descendants.",
+        help="The iri for the parent code to pull descendants",
     )
     parser.add_argument(
         "-p",
@@ -457,7 +471,14 @@ def exec(args=None):
         required=False,
         action="store_true",
         default=None,
-        help="Include details of the parent node.",
+        help="Include details of the parent node",
+    )
+    parser.add_argument(
+        "-c",
+        "--children",
+        required=False,
+        action="store_true",
+        help="Pull only the direct children for a code",
     )
 
     args = parser.parse_args()
@@ -475,13 +496,17 @@ def exec(args=None):
         )
 
     onto_data = ftd_ontology_lookup()
-    if args.all_keywords:
+    if args.all_keywords and (args.descendants or args.children):
         args.all_keywords = args.all_keywords.lower().replace("snomedct", "snomed")
-    if args.ontologies:
+    if args.ontologies and (args.descendants or args.children):
         args.ontologies = args.ontologies.lower().replace("snomedct", "snomed")
     if args.descendants and not args.ontologies:
         parser.error("-o/--ontologies is required when -d/--descendants is provided")
-    if args.descendants:
+    if args.descendants and args.children:
+        parser.error(
+            "Cannot use -d/--descendants and -c/--children together. Can only use one at a time."
+        )
+    if args.descendants or args.children:
         args.start_index = 0
         iri_results = []
 
@@ -518,7 +543,7 @@ def exec(args=None):
             start_index=args.start_index,
             iri=iri,
             parent_data=parent_data,
-            # direct_desc = args.direct_only
+            children=args.children,
         )
     else:
         do_search(

@@ -74,7 +74,13 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         return double_encoded_iri
 
     def build_url(
-        self, keywords, ontology_list, start_index, results_per_page, iri=None
+        self,
+        keywords,
+        ontology_list,
+        start_index,
+        results_per_page,
+        iri=None,
+        children=False,
     ):
         # TODO: add direct only args above. If direct only arg is there, do conditional below to use the children query instead (look into this to make sure that's correct)
         # results_per_page and start_index are not used in this class, but kept since they are used in other classes
@@ -93,17 +99,10 @@ class OLSDescendantsAPI(OLSSearchAPICode):
 
         iri_param = self.format_iri(iri)
 
+        last_term = "children" if children else "descendants"
+
         # Join the query params with / then join the params to the base url
-        url_blocks.append(
-            "/".join(
-                [
-                    ontology_list,
-                    "terms",
-                    iri_param,
-                    "descendants",
-                ]
-            )
-        )
+        url_blocks.append("/".join([ontology_list, "terms", iri_param, last_term]))
         complete_url = "".join(url_blocks)
 
         return complete_url
