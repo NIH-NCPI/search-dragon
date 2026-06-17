@@ -141,7 +141,7 @@ class OLSDescendantsAPI(OLSSearchAPICode):
             "system": system,
             "code_iri": raw_results.get("iri"),
             "display": display,
-            "description": description,
+            "description": description,  # Currently not reusing the display for the description. If the description field is empty but needs to be populated, the display can be used - YC 6/17/2026
             "ontology_prefix": ontology_prefix.upper(),
         }
 
