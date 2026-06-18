@@ -64,6 +64,16 @@ If you want to get the descendants for a code, provide the descendants flag alon
 $ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -d
 ```
 
+If you want to get only the direct children for a code, provide the children flag along with the ontology.
+```bash
+$ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -c
+```
+
+If you want to get the descendants/children for a code and include the parent node in the results, provide the appropriate descendants/children flag and the parent flag.
+```bash
+$ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -d -p
+```
+
 When writing results to a file, logging is written to stdout. When writing to a stdout, logging is written to the file, 'logs/search.log'
 
   ## Notes
