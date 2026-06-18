@@ -7,9 +7,11 @@ This script defines the `OLSSearchAPI` class that interacts with the Ontology Lo
 - Harmonize and structure raw results into a standardized format.
 
 """
-from search_dragon.external_apis import OntologyAPI
+
 from search_dragon import logger as getlogger
+from search_dragon.external_apis import OntologyAPI
 from search_dragon.result_structure import clean_url
+
 
 class OLSSearchAPI(OntologyAPI):
     def __init__(self):
@@ -18,7 +20,7 @@ class OLSSearchAPI(OntologyAPI):
             api_id="ols",
             api_name="Ontology Lookup Service",
         )
-        self.total_results_id = 'numFound'
+        self.total_results_id = "numFound"
 
     def collect_data(self, search_url, results_per_page, start_index):
         """
@@ -57,7 +59,9 @@ class OLSSearchAPI(OntologyAPI):
 
             total_results = data.get("response", {}).get(self.total_results_id, 0)
             logger.debug(f"Total results found: {total_results}")
-            logger.debug(f"Retrieved {len(results)} results (start_index: {start_index}).")
+            logger.debug(
+                f"Retrieved {len(results)} results (start_index: {start_index})."
+            )
 
             # Check if the start_index exceeds total results
             if start_index > total_results:
@@ -84,13 +88,13 @@ class OLSSearchAPI(OntologyAPI):
 
         Returns:
             The formatted query parameter to be inserted into the search url.
-        
+
         Example return: "q=brain%20cancer"
         """
 
-        keywords = keywords.replace(" ","%20")
+        keywords = keywords.replace(" ", "%20")
 
-        keyword_param=f"q={keywords}"
+        keyword_param = f"q={keywords}"
 
         return keyword_param
 
@@ -103,13 +107,13 @@ class OLSSearchAPI(OntologyAPI):
 
         Returns:
             str: The formatted ontology query parameter
-             
+
         Example return: "ontology=uberon,ma"
         """
 
         formatted_ontologies = ",".join(ontology_list)
 
-        ontology_param =f"ontology={formatted_ontologies}"
+        ontology_param = f"ontology={formatted_ontologies}"
 
         return ontology_param
 
@@ -129,7 +133,15 @@ class OLSSearchAPI(OntologyAPI):
 
         return start_param
 
-    def build_url(self, keywords, ontology_list, start_index, results_per_page):
+    def build_url(
+        self,
+        keywords,
+        ontology_list,
+        start_index,
+        results_per_page,
+        iri=None,
+        children=False,
+    ):
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 
@@ -171,10 +183,14 @@ class OLSSearchAPI(OntologyAPI):
             return [self.harmonize_data(item, ontology_data) for item in raw_results]
 
         # Get the ontology prefix from the raw result
-        ontology_prefix = raw_results.get("ontology_prefix") or "ERR:CURIE" # ERRs are caught by validate_data and not returned
+        ontology_prefix = (
+            raw_results.get("ontology_prefix") or "ERR:CURIE"
+        )  # ERRs are caught by validate_data and not returned
 
         # Retrieve the corresponding value from ontology_list
-        system = ontology_data.get(ontology_prefix) or "ERR:SYSTEM" # ERRs are caught by validate_data and not returned
+        system = (
+            ontology_data.get(ontology_prefix) or "ERR:SYSTEM"
+        )  # ERRs are caught by validate_data and not returned
 
         harmonized_data = {
             "code": raw_results.get("obo_id"),
