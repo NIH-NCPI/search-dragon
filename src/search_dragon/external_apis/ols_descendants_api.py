@@ -1,3 +1,4 @@
+import re
 import urllib.parse
 
 import rich
@@ -136,8 +137,19 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         description = raw_results.get("description")
         if isinstance(description, list):
             description = "\n".join(description)
+
+        orig_obo = raw_results.get("obo_id")
+        pattern = rf"{ontology_prefix}_(?P<sub_type>[a-z]+):(?P<code>\w+)"
+        match = re.search(pattern, orig_obo or "")
+        if match:
+            formatted_obo = (
+                f"{ontology_prefix}:{match.group('sub_type')}_{match.group('code')}"
+            )
+        else:
+            formatted_obo = orig_obo
+
         harmonized_data = {
-            "code": raw_results.get("obo_id"),
+            "code": formatted_obo,
             "system": system,
             "code_iri": raw_results.get("iri"),
             "display": display,
