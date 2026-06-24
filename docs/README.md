@@ -76,6 +76,13 @@ $ dragon_search -ak "SNOMED:7771000" -o "SNOMED" -d -p
 
 When writing results to a file, logging is written to stdout. When writing to a stdout, logging is written to the file, 'logs/search.log'
 
+### Descendants Formatting
+Some ontologies in the descendants/children search, return the code in a nonstandard curie format. 
+
+Example: EDAM_format:1234, rather than EDAM:format_1234
+
+To maintain congruence with the applications powered by Search-Dragon, the code results are formatted to the standard curie format (e.g. EDAM:format_1234).
+
   ## Notes
   ### API usage
   - OLSSearchAPI
