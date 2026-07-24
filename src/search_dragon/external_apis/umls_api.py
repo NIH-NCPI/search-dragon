@@ -159,7 +159,8 @@ class UMLSSearchAPI(OntologyAPI):
 
         return return_type_param
 
-    def build_url(self, keywords, ontology_list, start_index, results_per_page):
+    def build_url(self, keywords, ontology_list, start_index, results_per_page, iri=None,
+    children=False):
         """
         Constructs the search URL by combining the base URL, formatted keyword, and ontology parameters.
 
