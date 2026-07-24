@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"] 
+requires = ["setuptools", "setuptools-scm"] 
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,11 +19,10 @@ dependencies = [
     "rich"
 ]
 
-version="v2.0.6"
+# version="v2.0.6"
 
-# dynamic = ["version"]
-# [tool.setuptools_scm]
-# version_file = "src/search-dragon/_version.py"
+dynamic = ["version"]
+[tool.setuptools_scm]
 
 [tool.setuptools]
 include-package-data = true
