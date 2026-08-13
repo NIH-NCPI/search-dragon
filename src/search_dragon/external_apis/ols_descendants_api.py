@@ -71,7 +71,6 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         double_encoded_iri = urllib.parse.quote(
             urllib.parse.quote(iri, safe=""), safe=""
         )
-
         return double_encoded_iri
 
     def build_url(
@@ -105,7 +104,6 @@ class OLSDescendantsAPI(OLSSearchAPICode):
         # Join the query params with / then join the params to the base url
         url_blocks.append("/".join([ontology_list, "terms", iri_param, last_term]))
         complete_url = "".join(url_blocks)
-
         return complete_url
 
     def harmonize_data(self, raw_results, ontology_data):

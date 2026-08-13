@@ -513,7 +513,7 @@ def exec(args=None):
         if not args.iri or args.parent_data:
             search_results = run_search(
                 onto_data,
-                args.all_keywords,
+                args.all_keywords.replace(":", "_"),
                 [args.ontologies],
                 ["ols2"],
                 args.results_per_page,
