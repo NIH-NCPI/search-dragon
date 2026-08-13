@@ -142,6 +142,7 @@ def run_search(
                 next_cleaned = api_instance.clean_harmonized_data(next_harmonized)
                 matching = [m for m in next_cleaned if m.get("ontology_prefix", "")]
             combined_data = matching[:1] if matching else []
+    logger.debug(f"Count combined_data {len(combined_data)}")
 
     # Final cleaning and structuring of the combined data
     response = generate_response(
