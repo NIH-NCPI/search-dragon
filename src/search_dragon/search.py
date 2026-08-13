@@ -66,6 +66,7 @@ def run_search(
     iri=None,
     descendants=False,
     children=False,
+    filter=False,
 ):
     """
     The master function to execute the search process. It queries the APIs, harmonizes the results, and generates a cleaned, structured response.
@@ -112,8 +113,35 @@ def run_search(
 
         # Combine the ontology api data
         combined_data.extend(cleaned_harmonized_data)
+        # If "filter" is true, paginate URL until matching ontology prefix is found in results
+        if filter and ontology_list:
+            target_ontology = ontology_list[0].upper()
+            matching = [
+                m
+                for m in combined_data
+                if m.get("ontology_prefix", "").upper() == target_ontology
+            ]
+            current_page = start_index
 
-    logger.debug(f"Count combined_data {len(combined_data)}")
+            while not matching and more_results_available:
+                current_page += 1
+                next_url = api_instance.build_url(
+                    keyword,
+                    ontology_list,
+                    current_page,
+                    results_per_page,
+                    iri,
+                    children=children,
+                )
+                next_results, more_results_available = api_instance.collect_data(
+                    next_url, results_per_page, current_page
+                )
+                next_harmonized = api_instance.harmonize_data(
+                    next_results, ontology_data
+                )
+                next_cleaned = api_instance.clean_harmonized_data(next_harmonized)
+                matching = [m for m in next_cleaned if m.get("ontology_prefix", "")]
+            combined_data = matching[:1] if matching else []
 
     # Final cleaning and structuring of the combined data
     response = generate_response(
@@ -513,11 +541,12 @@ def exec(args=None):
         if not args.iri or args.parent_data:
             search_results = run_search(
                 onto_data,
-                args.all_keywords.replace(":", "_"),
+                args.all_keywords,
                 [args.ontologies],
                 ["ols2"],
                 args.results_per_page,
                 args.start_index,
+                filter=True,
             )
             iri_results = search_results.get("results", [])
         if args.iri:
